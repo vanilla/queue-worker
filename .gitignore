@@ -1,0 +1,8 @@
+/vendor/
+.project
+.settings
+.buildpath
+.idea/*
+.DS_Store
+Thumbs.db
+composer.lock

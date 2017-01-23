@@ -1,0 +1,44 @@
+{
+    "process": {
+        "sleep": 1,
+        "max_retries": 3,
+        "max_requests": 100
+    },
+    "queue": {
+        "driver": "disque",
+        "disque": {
+            "pool": [
+                {}
+            ]
+        }
+    },
+    "daemon": {
+        "loglevel": "info",
+        "runasgroup": "root",
+        "runasuser": "root",
+        "concurrent": false,
+        "daemonize": true,
+        "mode": "fleet",
+        "fleet": 2
+    },
+    "log": [
+        {
+            "destination": "echo",
+            "level": "debug",
+            "key": "echo"
+        },
+        {
+            "destination": "filesystem",
+            "level": "debug",
+            "file": "log/daemon.log",
+            "key": "persist"
+        }
+    ],
+    "lib": [
+        {
+            "name": "data-jobs",
+            "path": "/var/www/api/applications/vfdata",
+            "libraries": ["jobs"]
+        }
+    ]
+}

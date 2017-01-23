@@ -1,0 +1,48 @@
+{
+    "name": "vanilla/productqueue",
+    "description": "Vanilla Hosted Message Queue Runner",
+    "keywords": ["vanilla","queue","vanillaforums"],
+    "homepage": "https://github.com/vanilla/productqueue",
+    "type": "project",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Tim Gunter",
+            "email": "tim@vanillaforums.com",
+            "homepage": "https://vanillaforums.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/vanilla/garden-container"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/vanilla/garden-daemon"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/kaecyra/app-common"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/vanilla/queue-interop"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "kaecyra/app-common": "dev-master",
+        "container-interop/container-interop": "^1.1",
+        "vanilla/garden-container": "dev-master",
+        "vanilla/garden-daemon": "dev-master",
+        "vanilla/garden-cli": "^1.6",
+        "vanilla/queue-interop": "dev-master",
+        "psr/log": "~1.0"
+    },
+    "autoload": {
+        "psr-4": { 
+            "Vanilla\\ProductQueue\\": "src"
+        }
+    }
+}
