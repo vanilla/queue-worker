@@ -38,7 +38,8 @@
         "vanilla/garden-daemon": "dev-master",
         "vanilla/garden-cli": "^1.6",
         "vanilla/queue-interop": "dev-master",
-        "psr/log": "~1.0"
+        "psr/log": "~1.0",
+        "mariano/disque-php": "^2.0"
     },
     "autoload": {
         "psr-4": { 

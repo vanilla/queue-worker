@@ -14,7 +14,6 @@ use Kaecyra\AppCommon\Config;
 use Garden\Container\Container;
 use Garden\Container\Reference;
 
-use Garden\Daemon\AppInterface;
 use Garden\Daemon\Daemon;
 
 use Psr\Log\LoggerAwareInterface;

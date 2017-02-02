@@ -1,25 +1,42 @@
 {
-    "process": {
-        "sleep": 1,
-        "max_retries": 3,
-        "max_requests": 100
-    },
-    "queue": {
-        "driver": "disque",
-        "disque": {
-            "pool": [
-                {}
-            ]
-        }
-    },
     "daemon": {
-        "loglevel": "info",
+        "loglevel": "debug",
         "runasgroup": "root",
         "runasuser": "root",
         "concurrent": false,
         "daemonize": true,
         "mode": "fleet",
         "fleet": 2
+    },
+    "process": {
+        "sleep": 1,
+        "max_retries": 3,
+        "max_requests": 100
+    },
+    "queue": {
+        "nodes": [
+            ["localhost", 7711],
+            ["localhost", 7712],
+            ["localhost", 7713]
+        ],
+        "queues": [
+            {
+                "name": "priority",
+                "priority": 0,
+                "max_sequential": 3
+            },
+            {
+                "name": "normal",
+                "priority": 1,
+                "max_sequential": 0
+            }
+        ]
+    },
+    "cache": {
+        "nodes": [
+            ["localhost", 11211]
+        ],
+        "prefix": "productqueue"
     },
     "log": [
         {
