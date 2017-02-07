@@ -6,7 +6,7 @@
         "concurrent": false,
         "daemonize": true,
         "mode": "fleet",
-        "fleet": 2
+        "fleet": 10
     },
     "process": {
         "sleep": 1,
@@ -30,7 +30,10 @@
                 "priority": 1,
                 "max_sequential": 0
             }
-        ]
+        ],
+        "oversight": {
+            "frequency": 10
+        }
     },
     "cache": {
         "nodes": [
