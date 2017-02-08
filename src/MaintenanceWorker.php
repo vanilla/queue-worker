@@ -16,7 +16,7 @@ class MaintenanceWorker extends QueueWorker {
      *
      * This method runs the queue maintenance worker.
      */
-    public function run() {
+    public function run($workerConfig) {
 
         $this->log(LogLevel::INFO, "Maintenance Worker started");
 

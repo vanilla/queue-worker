@@ -32,7 +32,8 @@
             }
         ],
         "oversight": {
-            "frequency": 10
+            "frequency": 30,
+            "adjust": 5
         }
     },
     "cache": {

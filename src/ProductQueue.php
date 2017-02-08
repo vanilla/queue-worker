@@ -12,10 +12,8 @@ use Garden\Daemon\AppInterface;
 use Garden\Container\Container;
 
 use Garden\Cli\Cli;
-use Garden\Cli\Args;
 
 use Kaecyra\AppCommon\Config;
-use Kaecyra\AppCommon\Store;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -41,7 +39,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
     use LoggerBoilerTrait;
 
     /**
-     *
+     * Dependency Injection Container
      * @var \Garden\Container\Container
      */
     protected $di;
@@ -62,10 +60,16 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
     protected $cache;
 
     /**
-     * App transient storage
-     * @var \Kaecyra\AppCommon\Store
+     * Last oversight
+     * @var int
      */
-    protected $store;
+    protected $lastOversight;
+
+    /**
+     * Worker slots and pids
+     * @var array
+     */
+    protected $workers;
 
     /**
      * Construct app
@@ -77,6 +81,17 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
 
         $this->di->rule(QueueWorker::class);
         $this->di->addCall('prepareWorker');
+
+        $this->cleanEnvironment();
+    }
+
+    /**
+     * Clean up environment
+     *
+     */
+    public function cleanEnvironment() {
+        $this->lastOversight = 0;
+        $this->workers = [];
     }
 
     /**
@@ -92,6 +107,11 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
 
         $this->cli = $cli;
         $this->config = $config;
+
+        $fleetSize = $this->config->get('daemon.fleet');
+        for ($i = 0; $i < $fleetSize; $i++) {
+            $this->workers[$i] = null;
+        }
     }
 
     /**
@@ -133,9 +153,8 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
      */
     public function getLaunchOverride() {
         $oversightFrequency = $this->config->get('queue.oversight.frequency');
-        $lastOversight = $this->store->get('worker.oversight', 0);
 
-        if ((time() - $lastOversight) > $oversightFrequency) {
+        if ((time() - $this->lastOversight) > $oversightFrequency) {
             return true;
         }
         return false;
@@ -152,7 +171,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
     public function getWorkerConfig() {
 
         if ($this->getLaunchOverride()) {
-            $this->store->set('worker.oversight', time());
+            $this->lastOversight = time();
             return [
                 'worker'    => 'maintenance',
                 'class'     => MaintenanceWorker::class
@@ -161,8 +180,58 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
 
         return [
             'worker'    => 'product',
-            'class'     => ProductWorker::class
+            'class'     => ProductWorker::class,
+            'slot'      => $this->getFreeSlot()
         ];
+    }
+
+    /**
+     * Get first free available slot
+     *
+     * @return int
+     */
+    public function getFreeSlot(): int {
+        foreach ($this->workers as $slot => $pid) {
+            if (is_null($pid)) {
+                return $slot;
+            }
+        }
+        return count($this->workers);
+    }
+
+    /**
+     * Register spawned worker
+     *
+     * @param int $pid
+     * @param string $realm
+     * @param array $workerConfig
+     * @return bool
+     */
+    public function spawnedWorker($pid, $realm, $workerConfig): bool {
+        $slot = val('slot', $workerConfig, false);
+        if ($slot === false) {
+            return false;
+        }
+
+        $this->workers[$slot] = $pid;
+        return true;
+    }
+
+    /**
+     * Unregister reaped worker
+     *
+     * @param int $pid
+     * @param string $realm
+     * @return boolean
+     */
+    public function reapedWorker($pid, $realm): bool {
+        foreach ($this->workers as $slot => &$workerPid) {
+            if ($pid === $workerPid) {
+                $workerPid = null;
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -176,8 +245,8 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
      * @param array $workerConfig
      */
     public function run($workerConfig) {
-        // Erase store in worker
-        $this->store->flush();
+        // Clean worker environment
+        $this->cleanEnvironment();
 
         $workerClass = $workerConfig['class'];
 

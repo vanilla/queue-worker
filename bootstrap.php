@@ -9,7 +9,7 @@
  * @package productqueue
  */
 
-use Kaecyra\AppCommon\Config;
+use Kaecyra\AppCommon\ConfigCollection;
 
 use Garden\Container\Container;
 use Garden\Container\Reference;
@@ -62,7 +62,9 @@ require_once $autoloader;
 
 // Load configuration
 
-$config = Config::app(PATH_ROOT, 'conf/config.json');
+$config = new ConfigCollection();
+$config->addFile(paths(PATH_ROOT, 'conf/config.json'), false);
+$config->addFolder(paths(PATH_ROOT, 'conf/conf.d'), 'json');
 
 // Prepare Dependency Injection
 

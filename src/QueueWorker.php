@@ -29,8 +29,10 @@ abstract class QueueWorker implements LoggerAwareInterface {
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
 
+    const QUEUE_DISTRIBUTION_KEY = 'queue.worker.distribution';
+
     /**
-     *
+     * Dependency Injection Container
      * @var \Garden\Container\Container
      */
     protected $di;
@@ -42,7 +44,7 @@ abstract class QueueWorker implements LoggerAwareInterface {
     protected $config;
 
     /**
-     *
+     * Memcached cluster
      * @var \Memcached
      */
     protected $cache;
@@ -54,16 +56,10 @@ abstract class QueueWorker implements LoggerAwareInterface {
     protected $queue;
 
     /**
-     * Number of iterations remaining
+     * Worker slot
      * @var int
      */
-    protected $iterations;
-
-    /**
-     * Number of per-job retries
-     * @var int
-     */
-    protected $retries;
+    protected $slot;
 
     /**
      * Construct app
@@ -112,6 +108,6 @@ abstract class QueueWorker implements LoggerAwareInterface {
         $this->di->setInstance($this->queue::class, $this->queue);
     }
 
-    abstract public function run();
+    abstract public function run($workerConfig = null);
 
 }
