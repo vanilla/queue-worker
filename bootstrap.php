@@ -9,6 +9,8 @@
  * @package productqueue
  */
 
+use Kaecyra\AppCommon\ConfigInterface;
+use Kaecyra\AppCommon\AbstractConfig;
 use Kaecyra\AppCommon\ConfigCollection;
 
 use Garden\Container\Container;
@@ -60,21 +62,20 @@ if (!file_exists($autoloader)) {
 }
 require_once $autoloader;
 
-// Load configuration
-
-$config = new ConfigCollection();
-$config->addFile(paths(PATH_ROOT, 'conf/config.json'), false);
-$config->addFolder(paths(PATH_ROOT, 'conf/conf.d'), 'json');
-
 // Prepare Dependency Injection
 
 $di = new Container;
 $di
     ->setInstance(Container::class, $di)
-    ->setInstance(Config::class, $config)
 
     ->defaultRule()
     ->setShared(true)
+
+    ->rule(ConfigCollection::class)
+    ->addAlias(AbstractConfig::class)
+    ->addAlias(ConfigInterface::class)
+    ->addCall('addFile', [paths(PATH_ROOT, 'conf/config.json'), false])
+    ->addCall('addFolder', [paths(PATH_ROOT, 'conf/conf.d'), 'json'])
 
     ->rule(LoggerAwareInterface::class)
     ->addCall('setLogger')
@@ -90,14 +91,14 @@ $di
             'authorname'        => 'Tim Gunter',
             'authoremail'       => 'tim@vanillaforums.com'
         ],
-        new Reference([Config::class, 'daemon'])
+        new Reference([AbstractConfig::class, 'daemon'])
     ])
-    ->addCall('configure', [new Reference([Config::class, "daemon"])]);
+    ->addCall('configure', [new Reference([AbstractConfig::class, "daemon"])]);
 
 // Set up loggers
 
 $logger = new \Kaecyra\AppCommon\Log\AggregateLogger;
-$loggers = $config->get('log');
+$loggers = $di->get(AbstractConfig::class)->get('log');
 foreach ($loggers as $logConfig) {
     $loggerClass = "Kaecyra\\AppCommon\\Log\\".ucfirst($logConfig['destination']).'Logger';
     if ($di->has($loggerClass)) {

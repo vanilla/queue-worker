@@ -9,7 +9,7 @@ namespace Vanilla\ProductQueue;
 
 use Garden\Container\Container;
 
-use Kaecyra\AppCommon\Config;
+use Kaecyra\AppCommon\AbstractConfig;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -72,7 +72,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface {
      *
      * @param Container $di
      */
-    public function __construct(Container $di, Config $config) {
+    public function __construct(Container $di, AbstractConfig $config) {
         $this->di = $di;
         $this->config = $config;
         $this->queues = null;
@@ -83,9 +83,9 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface {
      *
      * @param string $scope
      * @param bool $refresh
-     * @return array
+     * @return array|string
      */
-    protected function getQueues($scope, $refresh = false): array {
+    protected function getQueues($scope = null, $refresh = false) {
         if (is_null($this->queues) || $refresh) {
             // Prepare queues (sort by priority)
             $queues = $this->config->get('queue.queues');
@@ -121,7 +121,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface {
      * @param string $queueName
      * @return array|null
      */
-    protected function getQueueDefinition($queueName) {
+    protected function getQueueDefinition($queueName): array {
         return val($queueName, $this->getQueues('full'), null);
     }
 
@@ -131,37 +131,47 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface {
      * This method prepares a forked worker to begin handling messages from
      * the queue.
      */
-    protected function prepareWorker() {
+    public function prepareWorker() {
 
         // Prepare cache driver
 
-        $this->log(LogLevel::INFO, "Connecting to cache");
+        $this->log(LogLevel::NOTICE, " connecting to cache");
         $cacheNodes = $this->config->get('cache.nodes');
-        $this->cache = new \Memcached;
-        foreach ($cacheNodes as $node) {
-            $this->cache->addServer($node[0], $node[1]);
-        }
-        $this->log(LogLevel::INFO, " cache servers: {nodes}", [
+        $this->log(LogLevel::NOTICE, "  cache servers: {nodes}", [
             'nodes' => count($cacheNodes)
         ]);
 
-        $this->di->setInstance($this->cache::class, $this->cache);
+        $this->cache = new \Memcached;
+        foreach ($cacheNodes as $node) {
+            $this->log(LogLevel::NOTICE, "  cache: {server}:{port}", [
+                'server'    => $node[0],
+                'port'      => $node[1]
+            ]);
+            $this->cache->addServer($node[0], $node[1]);
+        }
+
+        $this->di->setInstance(\Memcached::class, $this->cache);
 
         // Prepare queue driver
 
-        $this->log(LogLevel::INFO, "Connecting to queue");
+        $this->log(LogLevel::NOTICE, " connecting to queue");
         $queueNodes = $this->config->get('queue.nodes');
-        foreach ($queueNodes as &$node) {
-            $node = $this->di->getConstructorArgs(\Disque\Connection\Credentials, []);
-        }
-        $this->queue = new \Disque\Client($queueNodes);
-        $this->log(LogLevel::INFO, " queue servers: {nodes}", [
+        $this->log(LogLevel::NOTICE, "  queue servers: {nodes}", [
             'nodes' => count($queueNodes)
         ]);
 
-        $this->di->setInstance($this->queue::class, $this->queue);
+        foreach ($queueNodes as &$node) {
+            $this->log(LogLevel::NOTICE, "  queue: {server}:{port}", [
+                'server'    => $node[0],
+                'port'      => $node[1]
+            ]);
+            $node = $this->di->getArgs(\Disque\Connection\Credentials::class, $node);
+        }
+        $this->queue = new \Disque\Client($queueNodes);
+
+        $this->di->setInstance(\Disque\Client::class, $this->queue);
     }
 
-    abstract public function run($workerConfig = null);
+    abstract public function run($workerConfig);
 
 }

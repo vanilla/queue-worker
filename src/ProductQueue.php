@@ -7,19 +7,21 @@
 
 namespace Vanilla\ProductQueue;
 
+use Vanilla\ProductQueue\Allocation\AllocationStrategyInterface;
+use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
+
 use Garden\Daemon\AppInterface;
 use Garden\Container\Container;
 use Garden\Cli\Cli;
+use Garden\Cli\Args;
 
-use Vanilla\ProductQueue\Allocation\AllocationStrategyInterface;
-
-use Kaecyra\AppCommon\Config;
+use Kaecyra\AppCommon\AbstractConfig;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LogLevel;
 
-use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
+
 
 /**
  * Payload Context
@@ -75,11 +77,13 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
      *
      * @param Container $di
      */
-    public function __construct(Container $di) {
+    public function __construct(Container $di, Cli $cli, AbstractConfig $config) {
         $this->di = $di;
+        $this->cli = $cli;
+        $this->config = $config;
 
-        $this->di->rule(QueueWorker::class);
-        $this->di->addCall('prepareWorker');
+        //$this->di->rule(AbstractQueueWorker::class);
+        //$this->di->addCall('prepareWorker');
 
         // Set oversight strategy
         $strategy = $this->config->get('queue.oversight.strategy');
@@ -103,14 +107,9 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
      *
      * Provide any custom CLI configuration, and check validity of configuration.
      *
-     * @param Cli $cli
-     * @param Config $config
      */
-    public function preflight(Cli $cli, Config $config) {
-        $this->log(LogLevel::INFO, "Application preflight checking");
-
-        $this->cli = $cli;
-        $this->config = $config;
+    public function preflight() {
+        $this->log(LogLevel::NOTICE, "Application preflight checking");
 
         $fleetSize = $this->config->get('daemon.fleet');
         for ($i = 0; $i < $fleetSize; $i++) {
@@ -124,17 +123,19 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
      * This occurs in the main daemon process, prior to worker forking. No
      * connections should be established here, since this method's actions are
      * pre-worker forking, and will be shared to child processes.
+     *
+     * @param Args $args
      */
-    public function initialize() {
-        $this->log(LogLevel::INFO, "Application initializing");
+    public function initialize(Args $args) {
+        $this->log(LogLevel::NOTICE, "Application initializing");
 
         // Remove echo logger
 
-        $this->log(LogLevel::INFO, " transitioning logger");
+        $this->log(LogLevel::NOTICE, " transitioning logger");
         $this->getLogger()->removeLogger('echo', false);
         $this->getLogger()->enableLogger('persist');
 
-        $this->log(LogLevel::INFO, "Application initialized");
+        $this->log(LogLevel::NOTICE, "Application initialized");
     }
 
     /**
@@ -183,10 +184,15 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
             ];
         }
 
+        $slot = $this->getFreeSlot();
+        if ($slot === false) {
+            return false;
+        }
+
         return [
             'worker'    => 'product',
             'class'     => ProductWorker::class,
-            'slot'      => $this->getFreeSlot()
+            'slot'      => $slot
         ];
     }
 
@@ -201,7 +207,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
                 return $slot;
             }
         }
-        return count($this->workers);
+        return false;
     }
 
     /**

@@ -47,21 +47,6 @@ class ProductWorker extends AbstractQueueWorker {
      */
     protected $slotQueues;
 
-
-    public function __construct(Container $di, Config $config) {
-        parent::__construct($di, $config);
-
-        // Prepare sync
-
-        $this->lastSync = 0;
-        $this->syncFrequency = $this->config->get('queue.oversight.adjust', 5);
-
-        // Prepare execution environment
-
-        $this->iterations = $this->config->get('process.max_requests', 0);
-        $this->retries = $this->config->get('process.max_retries', 0);
-    }
-
     /**
      * Check if queue is a ready to retrieve jobs
      *
@@ -85,14 +70,14 @@ class ProductWorker extends AbstractQueueWorker {
     public function updateDistribution() {
         if (!$this->slotQueues || (time() - $this->lastSync) > $this->syncFrequency) {
             // Sync
-            $distribution = $this->cache->get(QueueWorker::QUEUE_DISTRIBUTION_KEY);
+            $distribution = $this->cache->get(AbstractQueueWorker::QUEUE_DISTRIBUTION_KEY);
             if (!$distribution) {
                 $distribution = [];
             }
 
             $update = val($this->slot, $distribution, $this->getQueues('pull'));
             if ($this->slotQueues != $update) {
-                $this->log(LogLevel::INFO, " updated queues for slot {$this->slot}: {$update}");
+                $this->log(LogLevel::NOTICE, " updated queues for slot {$this->slot}: {$update}");
                 $this->slotQueues = $update;
             }
         }
@@ -105,22 +90,39 @@ class ProductWorker extends AbstractQueueWorker {
      */
     public function run($workerConfig) {
 
-        $this->log(LogLevel::INFO, "Product Worker started");
+        // Prepare sync
+
+        $this->lastSync = 0;
+        $this->syncFrequency = $this->config->get('queue.oversight.adjust', 5);
+
+        // Prepare execution environment
+
+        $this->iterations = $this->config->get('process.max_requests', 0);
+        $this->retries = $this->config->get('process.max_retries', 0);
 
         // Prepare slot and initial distribution
 
         $this->slot = $workerConfig['slot'];
+
+        $this->log(LogLevel::NOTICE, "Product worker started (slot {slot})", [
+            'slot' => $this->slot
+        ]);
+
+        // Connect to queues and cache
+        $this->prepareWorker();
 
         // Get jobs. Do 'em.
         while ($this->isReady()) {
 
             $this->updateDistribution();
 
-            $message = $this->queue->getJob($this->slotQueues);
-            sleep(1);
+            //$message = $this->queue->getJob($this->slotQueues);
+            sleep(10);
 
             $this->iterations--;
         }
+
+        $this->log(LogLevel::NOTICE, " exhausted iterations, exiting");
     }
 
 }

@@ -1,6 +1,6 @@
 {
     "daemon": {
-        "loglevel": "debug",
+        "loglevel": "info",
         "runasgroup": "root",
         "runasuser": "root",
         "concurrent": false,

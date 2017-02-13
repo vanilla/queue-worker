@@ -65,7 +65,7 @@ trait LoggerBoilerTrait {
      * @param array $context optional.
      * @param type $options optional.
      */
-    private function log(string $level, string $message, array $context = []) {
+    protected function log(string $level, string $message, array $context = []) {
         if (!is_array($context)) {
             $context = [];
         }
