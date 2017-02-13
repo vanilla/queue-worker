@@ -6,7 +6,7 @@
         "concurrent": false,
         "daemonize": true,
         "mode": "fleet",
-        "fleet": 10
+        "fleet": 15
     },
     "process": {
         "sleep": 1,
@@ -14,32 +14,25 @@
         "max_requests": 100
     },
     "queue": {
-        "nodes": [
-            ["localhost", 7711],
-            ["localhost", 7712],
-            ["localhost", 7713]
-        ],
+        "oversight": {
+            "strategy": "\\Vanilla\\ProductQueue\\Allocation\\HybridStrategy",
+            "frequency": 30,
+            "adjust": 5
+        },
         "queues": [
             {
                 "name": "priority",
                 "priority": 0,
-                "max_sequential": 3
+                "min": 2
             },
             {
                 "name": "normal",
                 "priority": 1,
-                "max_sequential": 0
+                "min": 2
             }
-        ],
-        "oversight": {
-            "frequency": 30,
-            "adjust": 5
-        }
+        ]
     },
     "cache": {
-        "nodes": [
-            ["localhost", 11211]
-        ],
         "prefix": "productqueue"
     },
     "log": [

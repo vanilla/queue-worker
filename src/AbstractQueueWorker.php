@@ -24,7 +24,7 @@ use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
  * @package productqueue
  * @version 1.0
  */
-abstract class QueueWorker implements LoggerAwareInterface {
+abstract class AbstractQueueWorker implements LoggerAwareInterface {
 
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
@@ -62,6 +62,12 @@ abstract class QueueWorker implements LoggerAwareInterface {
     protected $slot;
 
     /**
+     * List of queues
+     * @var array
+     */
+    protected $queues;
+
+    /**
      * Construct app
      *
      * @param Container $di
@@ -69,6 +75,54 @@ abstract class QueueWorker implements LoggerAwareInterface {
     public function __construct(Container $di, Config $config) {
         $this->di = $di;
         $this->config = $config;
+        $this->queues = null;
+    }
+
+    /**
+     * Get list of queues
+     *
+     * @param string $scope
+     * @param bool $refresh
+     * @return array
+     */
+    protected function getQueues($scope, $refresh = false): array {
+        if (is_null($this->queues) || $refresh) {
+            // Prepare queues (sort by priority)
+            $queues = $this->config->get('queue.queues');
+            $sorted = [];
+            $priorityOffsets = [];
+            foreach ($queues as $queue) {
+                $priority = $queue['priority'] * 100;
+                $offset = val($priority, $priorityOffsets, 0);
+                $priority += $offset;
+                $priorityOffsets[$priority] = $offset;
+                $sorted[$priority] = $queue;
+            }
+
+            $this->queues = [
+                'simple'    => array_column(array_values($sorted), 'name'),
+                'full'      => $sorted,
+                'pull'      => implode(' ', array_column(array_values($sorted), 'name')),
+            ];
+        }
+
+        // Get all queues?
+        if (!$scope) {
+            return $this->queues;
+        }
+
+        // Get scoped
+        return val($scope, $this->queues);
+    }
+
+    /**
+     * Get a queue definition
+     *
+     * @param string $queueName
+     * @return array|null
+     */
+    protected function getQueueDefinition($queueName) {
+        return val($queueName, $this->getQueues('full'), null);
     }
 
     /**

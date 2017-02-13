@@ -8,10 +8,10 @@
 namespace Vanilla\ProductQueue;
 
 use Garden\Daemon\AppInterface;
-
 use Garden\Container\Container;
-
 use Garden\Cli\Cli;
+
+use Vanilla\ProductQueue\Allocation\AllocationStrategyInterface;
 
 use Kaecyra\AppCommon\Config;
 
@@ -20,7 +20,6 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LogLevel;
 
 use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
-
 
 /**
  * Payload Context
@@ -81,6 +80,11 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
 
         $this->di->rule(QueueWorker::class);
         $this->di->addCall('prepareWorker');
+
+        // Set oversight strategy
+        $strategy = $this->config->get('queue.oversight.strategy');
+        $this->di->rule(AllocationStrategyInterface::class);
+        $this->di->setClass($strategy);
 
         $this->cleanEnvironment();
     }
@@ -172,6 +176,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
 
         if ($this->getLaunchOverride()) {
             $this->lastOversight = time();
+
             return [
                 'worker'    => 'maintenance',
                 'class'     => MaintenanceWorker::class
