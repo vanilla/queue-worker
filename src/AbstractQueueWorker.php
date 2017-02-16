@@ -135,15 +135,15 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface {
 
         // Prepare cache driver
 
-        $this->log(LogLevel::NOTICE, " connecting to cache");
+        $this->log(LogLevel::INFO, " connecting to cache");
         $cacheNodes = $this->config->get('cache.nodes');
-        $this->log(LogLevel::NOTICE, "  cache servers: {nodes}", [
+        $this->log(LogLevel::INFO, "  cache servers: {nodes}", [
             'nodes' => count($cacheNodes)
         ]);
 
         $this->cache = new \Memcached;
         foreach ($cacheNodes as $node) {
-            $this->log(LogLevel::NOTICE, "  cache: {server}:{port}", [
+            $this->log(LogLevel::INFO, "  cache: {server}:{port}", [
                 'server'    => $node[0],
                 'port'      => $node[1]
             ]);
@@ -154,20 +154,21 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface {
 
         // Prepare queue driver
 
-        $this->log(LogLevel::NOTICE, " connecting to queue");
+        $this->log(LogLevel::INFO, " connecting to queue");
         $queueNodes = $this->config->get('queue.nodes');
-        $this->log(LogLevel::NOTICE, "  queue servers: {nodes}", [
+        $this->log(LogLevel::INFO, "  queue servers: {nodes}", [
             'nodes' => count($queueNodes)
         ]);
 
         foreach ($queueNodes as &$node) {
-            $this->log(LogLevel::NOTICE, "  queue: {server}:{port}", [
+            $this->log(LogLevel::INFO, "  queue: {server}:{port}", [
                 'server'    => $node[0],
                 'port'      => $node[1]
             ]);
             $node = $this->di->getArgs(\Disque\Connection\Credentials::class, $node);
         }
         $this->queue = new \Disque\Client($queueNodes);
+        $this->queue->connect();
 
         $this->di->setInstance(\Disque\Client::class, $this->queue);
     }

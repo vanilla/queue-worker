@@ -27,7 +27,7 @@ class HybridStrategy implements AllocationStrategyInterface {
      * @param array $queues
      * @return array
      */
-    public function allocate($workers, $queues) {
+    public function allocate(int $workers, array $queues): array {
         $availableWorkers = $workers;
 
         $distribution = [];

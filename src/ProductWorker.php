@@ -100,7 +100,7 @@ class ProductWorker extends AbstractQueueWorker {
         $this->iterations = $this->config->get('process.max_requests', 0);
         $this->retries = $this->config->get('process.max_retries', 0);
 
-        // Prepare slot and initial distribution
+        // Prepare slot
 
         $this->slot = $workerConfig['slot'];
 
@@ -111,18 +111,47 @@ class ProductWorker extends AbstractQueueWorker {
         // Connect to queues and cache
         $this->prepareWorker();
 
-        // Get jobs. Do 'em.
+        // Get jobs and do them.
+        $idleSleep = $this->config->get('process.sleep') * 1000;
         while ($this->isReady()) {
 
+            // Potentially update
             $this->updateDistribution();
 
-            //$message = $this->queue->getJob($this->slotQueues);
-            sleep(10);
+            $ran = $this->runIteration();
 
-            $this->iterations--;
+            // Sleep when no jobs are picked up
+            if (!$ran) {
+                usleep($idleSleep);
+            }
         }
 
         $this->log(LogLevel::NOTICE, " exhausted iterations, exiting");
+    }
+
+    /**
+     *
+     */
+    public function runIteration() {
+
+        // Get job from slot queues
+        $rawMessage = $this->queue->getJob($this->slotQueues, [
+            'nohang' => true
+        ]);
+
+        // No message? Return false immediately so worker can rest
+        if (empty($rawMessage)) {
+            return false;
+        }
+
+        $this->iterations--;
+
+        $this->log(LogLevel::CRITICAL, " got message from queue");
+        $this->log(LogLevel::CRITICAL, print_r($rawMessage, true));
+
+        //$this->queue->a
+
+        sleep(10);
     }
 
 }

@@ -109,7 +109,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
      *
      */
     public function preflight() {
-        $this->log(LogLevel::NOTICE, "Application preflight checking");
+        $this->log(LogLevel::INFO, " preflight checking");
 
         $fleetSize = $this->config->get('daemon.fleet');
         for ($i = 0; $i < $fleetSize; $i++) {
@@ -127,15 +127,13 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
      * @param Args $args
      */
     public function initialize(Args $args) {
-        $this->log(LogLevel::NOTICE, "Application initializing");
+        $this->log(LogLevel::INFO, " initializing");
 
         // Remove echo logger
 
-        $this->log(LogLevel::NOTICE, " transitioning logger");
+        $this->log(LogLevel::INFO, " transitioning logger");
         $this->getLogger()->removeLogger('echo', false);
         $this->getLogger()->enableLogger('persist');
-
-        $this->log(LogLevel::NOTICE, "Application initialized");
     }
 
     /**
@@ -256,6 +254,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
      * @param array $workerConfig
      */
     public function run($workerConfig) {
+
         // Clean worker environment
         $this->cleanEnvironment();
 
@@ -264,6 +263,41 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
         // Prepare worker environment
         $this->worker = $this->di->get($workerClass);
         $this->worker->run($workerConfig);
+    }
+
+    /**
+     * Handle errors
+     *
+     * @param int $errorLevel
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @param array $context
+     */
+    public function errorHandler($errorLevel , $message, $file, $line, $context) {
+
+        $errorFormat = "Error on line {line} of {file}:\n{message}";
+        $btData = "";
+        $exception = false;
+        if ($errorLevel & (E_RECOVERABLE_ERROR | E_ERROR | E_USER_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_PARSE)) {
+            // Generate backtrace
+            $backtrace = debug_backtrace();
+
+            $btData = $backtrace[0];
+            $errorFormat .= "\n{bt}";
+            $exception = true;
+        }
+
+        $this->log($this->phpErrorLevel($errorLevel), $errorFormat, [
+            'file' => $file,
+            'line' => $line,
+            'message' => $message,
+            'bt' => $btData
+        ]);
+
+        if ($exception) {
+            throw new \Garden\Daemon\ErrorException($message, $errorLevel , $file, $line, $context, $backtrace);
+        }
     }
 
 }

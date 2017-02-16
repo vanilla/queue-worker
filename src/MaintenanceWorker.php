@@ -34,8 +34,13 @@ class MaintenanceWorker extends AbstractQueueWorker {
         // Gather queue backlog information
         $queues = $this->getQueues('full');
         foreach ($queues as $priority => &$queue) {
-            $queue['backlog'] = $this->queue->qlen($queue['name']);
-            $this->log(LogLevel::NOTICE, " queue backlog {$queue['name']}: {$queue['backlog']}");
+            try {
+                $queue['backlog'] = $this->queue->qlen($queue['name']);
+            } catch (Exception $ex) {
+                $this->log(LogLevel::ERROR, print_r($ex, true));
+                continue;
+            }
+            $this->log(LogLevel::NOTICE, " queue backlog ({$queue['name']}): {$queue['backlog']}");
         }
 
         $strategy = $this->di->get(AllocationStrategyInterface::class);

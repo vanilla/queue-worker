@@ -38,7 +38,7 @@ trait LoggerBoilerTrait {
      * @param string|int $level The string log level or an actual priority.
      * @return int Returns the numeric log level or `8` if the level is invalid.
      */
-    private function levelPriority(string $level): int {
+    protected function levelPriority(string $level): int {
         static $priorities = [
             LogLevel::DEBUG     => LOG_DEBUG,
             LogLevel::INFO      => LOG_INFO,
@@ -55,6 +55,39 @@ trait LoggerBoilerTrait {
         } else {
             return LOG_DEBUG + 1;
         }
+    }
+
+    /**
+     * Get LogLevel corresponding to PHP error
+     *
+     * @param int $level
+     * @retuen string
+     */
+    protected function phpErrorLevel($level) {
+        switch ($level) {
+            case E_NOTICE:
+            case E_USER_NOTICE:
+            case E_STRICT:
+            case E_DEPRECATED:
+            case E_USER_DEPRECATED:
+                return LogLevel::NOTICE;
+
+            case E_WARNING:
+            case E_USER_WARNING:
+            case E_COMPILE_WARNING:
+            case E_CORE_WARNING:
+                return LogLevel::WARNING;
+
+            case E_ERROR:
+            case E_USER_ERROR:
+            case E_PARSE:
+            case E_COMPILE_ERROR:
+            case E_CORE_ERROR:
+            case E_RECOVERABLE_ERROR:
+                return LogLevel::ERROR;
+        }
+
+        return LogLevel::ERROR;
     }
 
     /**

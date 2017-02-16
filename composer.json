@@ -28,6 +28,10 @@
         {
             "type": "git",
             "url": "https://github.com/vanilla/queue-interop"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/mariano/disque-php"
         }
     ],
     "require": {
@@ -39,7 +43,7 @@
         "vanilla/garden-cli": "^1.6",
         "vanilla/queue-interop": "dev-master",
         "psr/log": "~1.0",
-        "mariano/disque-php": "^2.0"
+        "mariano/disque-php": "dev-master"
     },
     "autoload": {
         "psr-4": { 

@@ -9,7 +9,7 @@
         "fleet": 15
     },
     "process": {
-        "sleep": 1,
+        "sleep": 500,
         "max_retries": 3,
         "max_requests": 100
     },
