@@ -5,17 +5,20 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue;
+namespace Vanilla\ProductQueue\Worker;
+
+use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
+use Vanilla\ProductQueue\Parser\ParserInterface;
 
 use Garden\Container\Container;
 
 use Kaecyra\AppCommon\AbstractConfig;
+use Kaecyra\AppCommon\Event\EventAwareInterface;
+use Kaecyra\AppCommon\Event\EventAwareTrait;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LogLevel;
-
-use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
 
 /**
  * Abstract Worker base class
@@ -24,10 +27,12 @@ use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
  * @package productqueue
  * @version 1.0
  */
-abstract class AbstractQueueWorker implements LoggerAwareInterface {
+abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareInterface {
 
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
+
+    use EventAwareTrait;
 
     const QUEUE_DISTRIBUTION_KEY = 'queue.worker.distribution';
 
@@ -66,6 +71,12 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface {
      * @var array
      */
     protected $queues;
+
+    /**
+     * Message Parser
+     * @var ParserInterface
+     */
+    protected $parser;
 
     /**
      * Construct app
@@ -171,6 +182,18 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface {
         $this->queue->connect();
 
         $this->di->setInstance(\Disque\Client::class, $this->queue);
+
+        // Prepare queue message parser
+
+        $parser = $this->config->get('queue.message.parser');
+        $this->parser = $this->di->get($parser);
+        $this->di->setInstance(ParserInterface::class, $this->parser);
+
+        // Attach job handlers
+
+
+
+
     }
 
     abstract public function run($workerConfig);

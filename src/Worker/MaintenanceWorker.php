@@ -5,12 +5,19 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue;
+namespace Vanilla\ProductQueue\Worker;
 
 use Vanilla\ProductQueue\Allocation\AllocationStrategyInterface;
 
 use Psr\Log\LogLevel;
 
+/**
+ * Maintenance Worker
+ *
+ * @author Tim Gunter <tim@vanillaforums.com>
+ * @package productqueue
+ * @version 1.0
+ */
 class MaintenanceWorker extends AbstractQueueWorker {
 
     /**

@@ -19,6 +19,9 @@
             "frequency": 30,
             "adjust": 5
         },
+        "message": {
+            "parser": "\\Vanilla\\ProductQueue\\Message\\Parser\\JSONMessageParser"
+        },
         "queues": [
             {
                 "name": "priority",

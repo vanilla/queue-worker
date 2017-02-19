@@ -13,6 +13,8 @@ use Kaecyra\AppCommon\ConfigInterface;
 use Kaecyra\AppCommon\AbstractConfig;
 use Kaecyra\AppCommon\ConfigCollection;
 
+use Kaecyra\AppCommon\Event\EventAwareInterface;
+
 use Garden\Container\Container;
 use Garden\Container\Reference;
 
@@ -79,6 +81,9 @@ $di
 
     ->rule(LoggerAwareInterface::class)
     ->addCall('setLogger')
+
+    ->rule(EventAwareInterface::class)
+    ->addCall('setEventManager')
 
     ->rule(Daemon::class)
     ->setConstructorArgs([

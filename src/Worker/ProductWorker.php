@@ -5,10 +5,19 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue;
+namespace Vanilla\ProductQueue\Worker;
+
+use Vanilla\ProductQueue\Message\Message;
 
 use Psr\Log\LogLevel;
 
+/**
+ * Product Worker
+ *
+ * @author Tim Gunter <tim@vanillaforums.com>
+ * @package productqueue
+ * @version 1.0
+ */
 class ProductWorker extends AbstractQueueWorker {
 
     /**
@@ -46,6 +55,12 @@ class ProductWorker extends AbstractQueueWorker {
      * @var string
      */
     protected $slotQueues;
+
+    /**
+     * Dependency Injection Container (original)
+     * @var \Garden\Container\Container
+     */
+    protected $workerDI;
 
     /**
      * Check if queue is a ready to retrieve jobs
@@ -130,28 +145,89 @@ class ProductWorker extends AbstractQueueWorker {
     }
 
     /**
+     * Poll the queue for a message
      *
+     * @return bool
      */
     public function runIteration() {
 
         // Get job from slot queues
-        $rawMessage = $this->queue->getJob($this->slotQueues, [
+        $messages = $this->queue->getJob($this->slotQueues, [
             'nohang' => true
         ]);
 
         // No message? Return false immediately so worker can rest
-        if (empty($rawMessage)) {
+        if (empty($messages) || !is_array($messages)) {
             return false;
         }
 
+        // GetJob returns an array of messages
+        foreach ($messages as $rawMessage) {
+            $message = $this->handleMessage($rawMessage);
+            $messageStatus = $message->getStatus();
+
+            // Message handled, ACK
+            if ($messageStatus == Message::STATUS_COMPLETE) {
+                $this->queue->ackJob($message->getID());
+                continue;
+            }
+
+            // Message failed but should be retried, NACK
+            if ($messageStatus == Message::STATUS_RETRY) {
+                $this->queue->nack($message->getID());
+                continue;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Handle a queue message
+     *
+     * @param array $rawMessage
+     * @return Message
+     */
+    public function handleMessage($rawMessage) {
+
+        // Got a message, so decrement iterations
         $this->iterations--;
 
         $this->log(LogLevel::CRITICAL, " got message from queue");
         $this->log(LogLevel::CRITICAL, print_r($rawMessage, true));
 
-        //$this->queue->a
+        // Get message object
+        $message = $this->parser->decodeMessage($rawMessage);
+
+        // Clone DI to prevent pollution
+        $this->workerDI = clone $this->di;
+        $this->workerDI->setInstance(Container::class, $this->workerDI);
+
+        // Convert message to runnable job
+        $job = $this->getJob($message);
+
+        // No job could be found to handle this message
+        if (!$job) {
+            $message->setStatus(Message::STATUS_MISMATCH);
+            return $message;
+        }
 
         sleep(10);
+    }
+
+    /**
+     * Get job for message
+     *
+     * @param Message $message
+     * @return JobInterface
+     */
+    public function getJob(Message $message) {
+        $payloadType = $message->getPayloadType();
+
+        // Lookup job payload
+
+
+        // Create job instance
     }
 
 }

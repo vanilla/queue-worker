@@ -16,12 +16,12 @@ use Garden\Cli\Cli;
 use Garden\Cli\Args;
 
 use Kaecyra\AppCommon\AbstractConfig;
+use Kaecyra\AppCommon\Event\EventAwareInterface;
+use Kaecyra\AppCommon\Event\EventAwareTrait;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LogLevel;
-
-
 
 /**
  * Payload Context
@@ -34,10 +34,12 @@ use Psr\Log\LogLevel;
  * @package productqueue
  * @version 1.0
  */
-class ProductQueue implements AppInterface, LoggerAwareInterface {
+class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInterface {
 
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
+
+    use EventAwareTrait;
 
     /**
      * Dependency Injection Container
@@ -55,12 +57,6 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
     protected $config;
 
     /**
-     *
-     * @var \Memcached
-     */
-    protected $cache;
-
-    /**
      * Last oversight
      * @var int
      */
@@ -76,16 +72,15 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
      * Construct app
      *
      * @param Container $di
+     * @param Cli $cli
+     * @param AbstractConfig $config
      */
     public function __construct(Container $di, Cli $cli, AbstractConfig $config) {
         $this->di = $di;
         $this->cli = $cli;
         $this->config = $config;
 
-        //$this->di->rule(AbstractQueueWorker::class);
-        //$this->di->addCall('prepareWorker');
-
-        // Set oversight strategy
+        // Set worker allocation oversight strategy
         $strategy = $this->config->get('queue.oversight.strategy');
         $this->di->rule(AllocationStrategyInterface::class);
         $this->di->setClass($strategy);
@@ -178,7 +173,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
 
             return [
                 'worker'    => 'maintenance',
-                'class'     => MaintenanceWorker::class
+                'class'     => '\\Vanilla\\ProductQueue\\Worker\\MaintenanceWorker'
             ];
         }
 
@@ -189,7 +184,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface {
 
         return [
             'worker'    => 'product',
-            'class'     => ProductWorker::class,
+            'class'     => '\\Vanilla\\ProductQueue\\Worker\\ProductWorker',
             'slot'      => $slot
         ];
     }
