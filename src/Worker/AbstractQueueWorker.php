@@ -13,8 +13,8 @@ use Vanilla\ProductQueue\Parser\ParserInterface;
 use Garden\Container\Container;
 
 use Kaecyra\AppCommon\AbstractConfig;
-use Kaecyra\AppCommon\Event\EventAwareInterface;
-use Kaecyra\AppCommon\Event\EventAwareTrait;
+use Kaecyra\AppCommon\Event\EventFiresInterface;
+use Kaecyra\AppCommon\Event\EventFiresTrait;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -27,12 +27,11 @@ use Psr\Log\LogLevel;
  * @package productqueue
  * @version 1.0
  */
-abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareInterface {
+abstract class AbstractQueueWorker implements LoggerAwareInterface, EventFiresInterface {
 
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
-
-    use EventAwareTrait;
+    use EventFiresTrait;
 
     const QUEUE_DISTRIBUTION_KEY = 'queue.worker.distribution';
 
@@ -194,6 +193,15 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
 
 
 
+    }
+
+    /**
+     * Get worker slot
+     *
+     * @return int slot number
+     */
+    public function getSlot(): int {
+        return $this->slot;
     }
 
     /**

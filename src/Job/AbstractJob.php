@@ -9,8 +9,8 @@ namespace Vanilla\ProductQueue\Job;
 
 use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
 
-use Kaecyra\AppCommon\Event\EventAwareInterface;
-use Kaecyra\AppCommon\Event\EventAwareTrait;
+use Kaecyra\AppCommon\Event\EventFiresInterface;
+use Kaecyra\AppCommon\Event\EventFiresTrait;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -24,11 +24,10 @@ use Garden\Container\Container;
  * @package productqueue
  * @version 1.0
  */
-abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventAwareInterface {
+abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventFiresInterface {
 
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
-
-    use EventAwareTrait;
+    use EventFiresTrait;
 
 }

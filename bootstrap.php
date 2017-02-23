@@ -13,7 +13,8 @@ use Kaecyra\AppCommon\ConfigInterface;
 use Kaecyra\AppCommon\AbstractConfig;
 use Kaecyra\AppCommon\ConfigCollection;
 
-use Kaecyra\AppCommon\Event\EventAwareInterface;
+use Kaecyra\AppCommon\Event\EventFiresInterface;
+use Kaecyra\AppCommon\Event\EventBindsInterface;
 
 use Vanilla\ProductQueue\Addon\AddonManager;
 
@@ -84,7 +85,10 @@ $di
     ->rule(LoggerAwareInterface::class)
     ->addCall('setLogger')
 
-    ->rule(EventAwareInterface::class)
+    ->rule(EventFiresInterface::class)
+    ->addCall('setEventManager')
+
+    ->rule(EventBindsInterface::class)
     ->addCall('setEventManager')
 
     ->rule(AddonManager::class)

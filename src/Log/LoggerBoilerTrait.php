@@ -24,7 +24,7 @@ trait LoggerBoilerTrait {
      */
     private function getLogger() {
         if (!($this->logger instanceof LoggerInterface)) {
-            return new NullLogger;
+            $this->logger = new NullLogger;
         }
         return $this->logger;
     }

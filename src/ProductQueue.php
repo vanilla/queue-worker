@@ -17,8 +17,8 @@ use Garden\Cli\Cli;
 use Garden\Cli\Args;
 
 use Kaecyra\AppCommon\AbstractConfig;
-use Kaecyra\AppCommon\Event\EventAwareInterface;
-use Kaecyra\AppCommon\Event\EventAwareTrait;
+use Kaecyra\AppCommon\Event\EventFiresInterface;
+use Kaecyra\AppCommon\Event\EventFiresTrait;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -35,12 +35,11 @@ use Psr\Log\LogLevel;
  * @package productqueue
  * @version 1.0
  */
-class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInterface {
+class ProductQueue implements AppInterface, LoggerAwareInterface, EventFiresInterface {
 
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
-
-    use EventAwareTrait;
+    use EventFiresTrait;
 
     /**
      * Dependency Injection Container
@@ -48,7 +47,16 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
      */
     protected $di;
 
+    /**
+     * Commandline handler
+     * @var Cli
+     */
     protected $cli;
+
+    /**
+     * Commandline args
+     * @var Args
+     */
     protected $args;
 
     /**
@@ -139,7 +147,6 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
         $this->getLogger()->enableLogger('persist');
 
         $this->addons->startAddons($this->config->get('addons.active'));
-        die();
     }
 
     /**

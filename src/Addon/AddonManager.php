@@ -9,14 +9,16 @@ namespace Vanilla\ProductQueue\Addon;
 
 use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
 
-use Kaecyra\AppCommon\Event\EventAwareInterface;
-use Kaecyra\AppCommon\Event\EventAwareTrait;
+use Kaecyra\AppCommon\AbstractConfig;
+use Kaecyra\AppCommon\Event\EventBindsInterface;
+use Kaecyra\AppCommon\Event\EventBindsTrait;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LogLevel;
 
 use Garden\Container\Container;
+use Garden\Container\Reference;
 
 /**
  * ProductQueue Addon manager
@@ -25,12 +27,11 @@ use Garden\Container\Container;
  * @package productqueue
  * @since 1.0
  */
-class AddonManager implements LoggerAwareInterface, EventAwareInterface {
+class AddonManager implements LoggerAwareInterface, EventBindsInterface {
 
     use LoggerBoilerTrait;
     use LoggerAwareTrait;
-
-    use EventAwareTrait;
+    use EventBindsTrait;
 
     /**
      * Dependency Injection Container
@@ -285,8 +286,11 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
             $this->log(LogLevel::INFO, "{$nest}   creating addon instance: {$addonClass}");
 
             // Get instance
-            $instance = $this->di->get($addonClass);
+            $instance = $this->di->getArgs($addonClass, [
+                new Reference([AbstractConfig::class, "addons.addon.{$addonName}"])
+            ]);
             $this->instances[$addonName] = $instance;
+            $instance->start();
 
         }
 

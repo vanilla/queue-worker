@@ -16,4 +16,24 @@ namespace Vanilla\ProductQueue\Addon;
  */
 interface AddonInterface {
 
+    /**
+     * Set addon marker
+     *
+     * @param Addon $addon
+     */
+    public function setAddon(Addon $addon);
+
+    /**
+     * Bind any required events
+     */
+    public function start();
+
+    /**
+     * Bind to an event
+     *
+     * @param string $event
+     * @param callable $handler
+     */
+    public function bind(string $event, callable $handler);
+
 }
