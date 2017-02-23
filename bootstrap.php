@@ -15,6 +15,8 @@ use Kaecyra\AppCommon\ConfigCollection;
 
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 
+use Vanilla\ProductQueue\Addon\AddonManager;
+
 use Garden\Container\Container;
 use Garden\Container\Reference;
 
@@ -84,6 +86,9 @@ $di
 
     ->rule(EventAwareInterface::class)
     ->addCall('setEventManager')
+
+    ->rule(AddonManager::class)
+    ->setConstructorArgs([new Reference([AbstractConfig::class, 'addons.scan'])])
 
     ->rule(Daemon::class)
     ->setConstructorArgs([

@@ -40,7 +40,7 @@ class JSONMessageParser extends AbstractMessageParser {
      * @param Message $message
      * @return string
      */
-    public function encodeMessage(Message $message) {
+    public function encodeMessage(Message $message): string {
         $rawMessage = "";
 
         // Build header section

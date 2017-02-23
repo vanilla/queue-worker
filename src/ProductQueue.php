@@ -9,6 +9,7 @@ namespace Vanilla\ProductQueue;
 
 use Vanilla\ProductQueue\Allocation\AllocationStrategyInterface;
 use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
+use Vanilla\ProductQueue\Addon\AddonManager;
 
 use Garden\Daemon\AppInterface;
 use Garden\Container\Container;
@@ -57,6 +58,12 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
     protected $config;
 
     /**
+     * Addon manager
+     * @var \Vanilla\ProductQueue\Addon\AddonManager
+     */
+    protected $addons;
+
+    /**
      * Last oversight
      * @var int
      */
@@ -75,10 +82,11 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
      * @param Cli $cli
      * @param AbstractConfig $config
      */
-    public function __construct(Container $di, Cli $cli, AbstractConfig $config) {
+    public function __construct(Container $di, Cli $cli, AbstractConfig $config, AddonManager $addons) {
         $this->di = $di;
         $this->cli = $cli;
         $this->config = $config;
+        $this->addons = $addons;
 
         // Set worker allocation oversight strategy
         $strategy = $this->config->get('queue.oversight.strategy');
@@ -129,6 +137,9 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
         $this->log(LogLevel::INFO, " transitioning logger");
         $this->getLogger()->removeLogger('echo', false);
         $this->getLogger()->enableLogger('persist');
+
+        $this->addons->startAddons($this->config->get('addons.active'));
+        die();
     }
 
     /**

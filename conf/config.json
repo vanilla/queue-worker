@@ -35,6 +35,11 @@
             }
         ]
     },
+    "addons": {
+        "scan": [
+            "addons/"
+        ]
+    },
     "cache": {
         "prefix": "productqueue"
     },

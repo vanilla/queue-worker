@@ -23,7 +23,7 @@ interface ParserInterface {
      *
      * @return Message
      */
-    public function decodeMessage($id, $body): Message;
+    public function decodeMessage($rawMessage): Message;
 
     /**
      * Encode message body

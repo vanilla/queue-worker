@@ -22,7 +22,7 @@ abstract class AbstractMessageParser implements ParserInterface {
      * @param array $rawMessage
      * @return array
      */
-    public function extractMessageFields(array $rawMessage) {
+    public function extractMessageFields(array $rawMessage): array {
         $id = $rawMessage['id'];
         $body = $rawMessage['body'];
 

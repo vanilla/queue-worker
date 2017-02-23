@@ -196,6 +196,11 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
 
     }
 
+    /**
+     * Run worker
+     *
+     * @param mixed $workerConfig
+     */
     abstract public function run($workerConfig);
 
 }

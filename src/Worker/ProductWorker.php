@@ -8,6 +8,7 @@
 namespace Vanilla\ProductQueue\Worker;
 
 use Vanilla\ProductQueue\Message\Message;
+use Vanilla\ProductQueue\Job\AbstractJob;
 
 use Psr\Log\LogLevel;
 
@@ -94,8 +95,41 @@ class ProductWorker extends AbstractQueueWorker {
             if ($this->slotQueues != $update) {
                 $this->log(LogLevel::NOTICE, " updated queues for slot {$this->slot}: {$update}");
                 $this->slotQueues = $update;
+
+                $this->fire('updatedQueues', [$this]);
             }
         }
+    }
+
+    /**
+     * Prepare product worker
+     *
+     * @param array $workerConfig
+     */
+    public function prepareProductWorker($workerConfig) {
+        // Prepare sync tracking
+
+        $this->lastSync = 0;
+        $this->syncFrequency = $this->config->get('queue.oversight.adjust', 5);
+
+        // Prepare execution environment tracking
+
+        $this->iterations = $this->config->get('process.max_requests', 0);
+        $this->retries = $this->config->get('process.max_retries', 0);
+
+        // Prepare slot tracking
+
+        $this->slot = $workerConfig['slot'];
+
+        // Announce worker startup
+        $this->log(LogLevel::NOTICE, "Product worker started (slot {slot})", [
+            'slot' => $this->slot
+        ]);
+
+        // Connect to queues and cache
+        $this->prepareWorker();
+
+        $this->fire('newWorker', [$this]);
     }
 
     /**
@@ -105,32 +139,14 @@ class ProductWorker extends AbstractQueueWorker {
      */
     public function run($workerConfig) {
 
-        // Prepare sync
-
-        $this->lastSync = 0;
-        $this->syncFrequency = $this->config->get('queue.oversight.adjust', 5);
-
-        // Prepare execution environment
-
-        $this->iterations = $this->config->get('process.max_requests', 0);
-        $this->retries = $this->config->get('process.max_retries', 0);
-
-        // Prepare slot
-
-        $this->slot = $workerConfig['slot'];
-
-        $this->log(LogLevel::NOTICE, "Product worker started (slot {slot})", [
-            'slot' => $this->slot
-        ]);
-
-        // Connect to queues and cache
-        $this->prepareWorker();
+        // Prepare worker
+        $this->prepareProductWorker($workerConfig);
 
         // Get jobs and do them.
         $idleSleep = $this->config->get('process.sleep') * 1000;
         while ($this->isReady()) {
 
-            // Potentially update
+            // Potentially update worker distribution according to oversight
             $this->updateDistribution();
 
             $ran = $this->runIteration();
@@ -203,25 +219,37 @@ class ProductWorker extends AbstractQueueWorker {
         $this->workerDI = clone $this->di;
         $this->workerDI->setInstance(Container::class, $this->workerDI);
 
+        $this->fire('gotMessage', [$message]);
+
         // Convert message to runnable job
         $job = $this->getJob($message);
 
         // No job could be found to handle this message
         if (!$job) {
             $message->setStatus(Message::STATUS_MISMATCH);
+            $this->fire('noJob', [$message]);
             return $message;
         }
 
+        $this->fire('gotJob', [$job]);
+
+        $job->setup();
+
+        $job->run();
         sleep(10);
+
+        $job->teardown();
+
+        $this->fire('finishedJob', [$job]);
     }
 
     /**
      * Get job for message
      *
      * @param Message $message
-     * @return JobInterface
+     * @return AbstractJob
      */
-    public function getJob(Message $message) {
+    public function getJob(Message $message): AbstractJob {
         $payloadType = $message->getPayloadType();
 
         // Lookup job payload
