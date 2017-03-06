@@ -10,8 +10,8 @@ namespace Vanilla\ProductQueue\Addon;
 use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
 
 use Kaecyra\AppCommon\Event\EventManager;
-use Kaecyra\AppCommon\Event\EventBindsInterface;
-use Kaecyra\AppCommon\Event\EventBindsTrait;
+use Kaecyra\AppCommon\Event\EventAwareInterface;
+use Kaecyra\AppCommon\Event\EventAwareTrait;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -23,23 +23,17 @@ use Psr\Log\LoggerAwareTrait;
  * @package productqueue
  * @since 1.0
  */
-abstract class AbstractAddon implements AddonInterface, EventBindsInterface, LoggerAwareInterface {
+abstract class AbstractAddon implements AddonInterface, EventAwareInterface, LoggerAwareInterface {
 
     use LoggerBoilerTrait;
     use LoggerAwareTrait;
-    use EventBindsTrait;
+    use EventAwareTrait;
 
     /**
      * Addon marker
      * @var Addon
      */
     protected $addon;
-
-    /**
-     * Event manager
-     * @var EventManager
-     */
-    protected $events;
 
     /**
      * Addon config

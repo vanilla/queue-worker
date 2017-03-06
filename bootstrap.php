@@ -13,8 +13,7 @@ use Kaecyra\AppCommon\ConfigInterface;
 use Kaecyra\AppCommon\AbstractConfig;
 use Kaecyra\AppCommon\ConfigCollection;
 
-use Kaecyra\AppCommon\Event\EventFiresInterface;
-use Kaecyra\AppCommon\Event\EventBindsInterface;
+use Kaecyra\AppCommon\Event\EventAwareInterface;
 
 use Vanilla\ProductQueue\Addon\AddonManager;
 
@@ -85,10 +84,7 @@ $di
     ->rule(LoggerAwareInterface::class)
     ->addCall('setLogger')
 
-    ->rule(EventFiresInterface::class)
-    ->addCall('setEventManager')
-
-    ->rule(EventBindsInterface::class)
+    ->rule(EventAwareInterface::class)
     ->addCall('setEventManager')
 
     ->rule(AddonManager::class)
@@ -112,12 +108,13 @@ $di
 // Set up loggers
 
 $logger = new \Kaecyra\AppCommon\Log\AggregateLogger;
-$loggers = $di->get(AbstractConfig::class)->get('log');
+$logLevel = $di->get(AbstractConfig::class)->get('log.level');
+$loggers = $di->get(AbstractConfig::class)->get('log.loggers');
 foreach ($loggers as $logConfig) {
     $loggerClass = "Kaecyra\\AppCommon\\Log\\".ucfirst($logConfig['destination']).'Logger';
     if ($di->has($loggerClass)) {
         $subLogger = $di->getArgs($loggerClass, [PATH_ROOT, $logConfig]);
-        $logger->addLogger($subLogger, $logConfig['level'] ?? null, $logConfig['key'] ?? null);
+        $logger->addLogger($subLogger, $logConfig['level'] ?? $logLevel, $logConfig['key'] ?? null);
     }
 }
 

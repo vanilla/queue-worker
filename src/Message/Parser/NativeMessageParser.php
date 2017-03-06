@@ -10,13 +10,13 @@ namespace Vanilla\ProductQueue\Message\Parser;
 use Vanilla\ProductQueue\Message\Message;
 
 /**
- * JSON queue message parser
+ * Native queue message parser
  *
  * @author Tim Gunter <tim@vanillaforums.com>
  * @package productqueue
  * @version 1.0
  */
-class JSONMessageParser extends AbstractMessageParser {
+class NativeMessageParser extends AbstractMessageParser {
 
     /**
      * Decode message from queue
@@ -27,10 +27,6 @@ class JSONMessageParser extends AbstractMessageParser {
     public function decodeMessage(array $rawMessage): Message {
         // Extract message features
         $fields = $this->extractMessageFields($rawMessage);
-
-        // Decode message body
-        $fields['body'] = json_decode($fields['body'], true);
-
         return new Message($fields['id'], $fields['headers'], $fields['body'], $fields['extras']);
     }
 
@@ -38,11 +34,10 @@ class JSONMessageParser extends AbstractMessageParser {
      * Encode message for queue insertion
      *
      * @param Message $message
-     * @return string
+     * @return array
      */
     public function encodeMessage(Message $message) {
-        $encodedBody = json_encode($message->getBody());
-        return [$message->getHeaders(), $encodedBody];
+        return [$message->getHeaders(), $message->getBody()];
     }
 
 }

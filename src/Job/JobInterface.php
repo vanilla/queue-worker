@@ -19,10 +19,32 @@ use Garden\Container\Container;
 interface JobInterface {
 
     /**
+     * Get job data
      *
-     * @param Container $di
+     * @return array
      */
-    public function __construct(Container $di, Message $message);
+    public function getData(): array;
+
+    /**
+     * Set job data
+     *
+     * @param array $data
+     */
+    public function setData(array $data);
+
+    /**
+     * Get message handling status
+     *
+     * @return string
+     */
+    public function getStatus(): string;
+
+    /**
+     * Set message handling status
+     *
+     * @param string $status
+     */
+    public function setStatus(string $status);
 
     /**
      * Setup job payload for execution

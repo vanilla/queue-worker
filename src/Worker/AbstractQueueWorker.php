@@ -8,13 +8,13 @@
 namespace Vanilla\ProductQueue\Worker;
 
 use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
-use Vanilla\ProductQueue\Parser\ParserInterface;
+use Vanilla\ProductQueue\Message\Parser\ParserInterface;
 
 use Garden\Container\Container;
 
 use Kaecyra\AppCommon\AbstractConfig;
-use Kaecyra\AppCommon\Event\EventFiresInterface;
-use Kaecyra\AppCommon\Event\EventFiresTrait;
+use Kaecyra\AppCommon\Event\EventAwareInterface;
+use Kaecyra\AppCommon\Event\EventAwareTrait;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -27,11 +27,11 @@ use Psr\Log\LogLevel;
  * @package productqueue
  * @version 1.0
  */
-abstract class AbstractQueueWorker implements LoggerAwareInterface, EventFiresInterface {
+abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareInterface {
 
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
-    use EventFiresTrait;
+    use EventAwareTrait;
 
     const QUEUE_DISTRIBUTION_KEY = 'queue.worker.distribution';
 
@@ -89,6 +89,16 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventFiresIn
     }
 
     /**
+     * Get raw queues
+     *
+     * @return array
+     */
+    protected function getRawQueues(): array {
+        $queues = $this->config->get('queue.queues');
+        return $this->fireFilter('getRawQueues', $queues);
+    }
+
+    /**
      * Get list of queues
      *
      * @param string $scope
@@ -98,7 +108,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventFiresIn
     protected function getQueues($scope = null, $refresh = false) {
         if (is_null($this->queues) || $refresh) {
             // Prepare queues (sort by priority)
-            $queues = $this->config->get('queue.queues');
+            $queues = $this->getRawQueues();
             $sorted = [];
             $priorityOffsets = [];
             foreach ($queues as $queue) {
@@ -184,15 +194,10 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventFiresIn
 
         // Prepare queue message parser
 
-        $parser = $this->config->get('queue.message.parser');
-        $this->parser = $this->di->get($parser);
-        $this->di->setInstance(ParserInterface::class, $this->parser);
-
-        // Attach job handlers
-
-
-
-
+        $this->parser = $this->di->get(ParserInterface::class);
+        $this->log(LogLevel::INFO, " using parser {class}",[
+            'class' => get_class($this->parser)
+        ]);
     }
 
     /**

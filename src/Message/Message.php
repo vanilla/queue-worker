@@ -16,13 +16,6 @@ namespace Vanilla\ProductQueue\Message;
  */
 class Message {
 
-    const STATUS_RECEIVED = 'received';
-    const STATUS_INPROCESS = 'inprocess';
-    const STATUS_COMPLETE = 'complete';
-    const STATUS_FAILED = 'failed';
-    const STATUS_RETRY = 'retry';
-    const STATUS_MISMATCH = 'mismatch';
-
     /**
      * Message ID
      * @var string
@@ -42,16 +35,16 @@ class Message {
     protected $body;
 
     /**
-     *
+     * Message Extras
+     * @var array
+     */
+    protected $extras;
+
+    /**
+     * Message Queue
      * @var string
      */
     protected $queue;
-
-    /**
-     *
-     * @var type
-     */
-    protected $status;
 
     /**
      * Create message
@@ -59,15 +52,15 @@ class Message {
      * @param string $id
      * @param array $headers
      * @param array $body
+     * @param array $extras optional
      */
-    public function __construct($id, $headers, $body) {
+    public function __construct(string $id, array $headers, array $body, array $extras = []) {
         $this->id = $id;
         $this->headers = $headers;
         $this->body = $body;
+        $this->extras = $extras;
 
         $this->queue = $this->headers['queue'] ?? null;
-
-        $this->status = self::STATUS_RECEIVED;
     }
 
     /**
@@ -75,7 +68,7 @@ class Message {
      *
      * @return string
      */
-    public function getID() {
+    public function getID(): string {
         return $this->id;
     }
 
@@ -84,7 +77,7 @@ class Message {
      *
      * @return array
      */
-    public function getHeaders() {
+    public function getHeaders(): array {
         return $this->headers;
     }
 
@@ -93,26 +86,8 @@ class Message {
      *
      * @return array
      */
-    public function getBody() {
+    public function getBody(): array {
         return $this->body;
-    }
-
-    /**
-     * Get message handling status
-     *
-     * @return string
-     */
-    public function getStatus() {
-        return $this->status;
-    }
-
-    /**
-     * Set message handling status
-     *
-     * @param string $status
-     */
-    public function setStatus($status) {
-        $this->status = $status;
     }
 
     /**
@@ -120,8 +95,27 @@ class Message {
      *
      * @return string|null
      */
-    public function getPayloadType() {
-        return $this->header['job'] ?? null;
+    public function getPayloadType(): string {
+        return $this->headers['job'] ?? null;
+    }
+
+    /**
+     * Get extras
+     *
+     * @return array
+     */
+    public function getExtras(): array {
+        return $this->extras;
+    }
+
+    /**
+     * Get extra
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function getExtra(string $key) {
+        return $this->extras[$key] ?? null;
     }
 
 }

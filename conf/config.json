@@ -1,12 +1,11 @@
 {
     "daemon": {
-        "loglevel": "info",
         "runasgroup": "root",
         "runasuser": "root",
         "concurrent": false,
         "daemonize": true,
         "mode": "fleet",
-        "fleet": 15
+        "fleet": 6
     },
     "process": {
         "sleep": 500,
@@ -20,22 +19,14 @@
             "adjust": 5
         },
         "message": {
-            "parser": "\\Vanilla\\ProductQueue\\Message\\Parser\\JSONMessageParser"
-        },
-        "queues": [
-            {
-                "name": "priority",
-                "priority": 0,
-                "min": 2
-            },
-            {
-                "name": "normal",
-                "priority": 1,
-                "min": 2
-            }
-        ]
+            "parser": "\\Vanilla\\ProductQueue\\Message\\Parser\\NativeMessageParser"
+        }
     },
     "addons": {
+        "active": {
+            "Vanilla": "on",
+            "Syslog": "on"
+        },
         "scan": [
             "addons/"
         ]
@@ -43,24 +34,18 @@
     "cache": {
         "prefix": "productqueue"
     },
-    "log": [
-        {
-            "destination": "echo",
-            "level": "debug",
-            "key": "echo"
-        },
-        {
-            "destination": "filesystem",
-            "level": "debug",
-            "file": "log/daemon.log",
-            "key": "persist"
-        }
-    ],
-    "lib": [
-        {
-            "name": "data-jobs",
-            "path": "/var/www/api/applications/vfdata",
-            "libraries": ["jobs"]
-        }
-    ]
+    "log": {
+        "level": "info",
+        "loggers": [
+            {
+                "destination": "echo",
+                "key": "echo"
+            },
+            {
+                "destination": "filesystem",
+                "file": "log/daemon.log",
+                "key": "persist"
+            }
+        ]
+    }
 }

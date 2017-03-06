@@ -10,8 +10,8 @@ namespace Vanilla\ProductQueue\Addon;
 use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
 
 use Kaecyra\AppCommon\AbstractConfig;
-use Kaecyra\AppCommon\Event\EventBindsInterface;
-use Kaecyra\AppCommon\Event\EventBindsTrait;
+use Kaecyra\AppCommon\Event\EventAwareInterface;
+use Kaecyra\AppCommon\Event\EventAwareTrait;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -27,11 +27,11 @@ use Garden\Container\Reference;
  * @package productqueue
  * @since 1.0
  */
-class AddonManager implements LoggerAwareInterface, EventBindsInterface {
+class AddonManager implements LoggerAwareInterface, EventAwareInterface {
 
     use LoggerBoilerTrait;
     use LoggerAwareTrait;
-    use EventBindsTrait;
+    use EventAwareTrait;
 
     /**
      * Dependency Injection Container
@@ -153,7 +153,7 @@ class AddonManager implements LoggerAwareInterface, EventBindsInterface {
             }
 
             try {
-                $addon = new Addon($definitionFile);
+                $addon = new Addon(realpath($definitionFile));
             } catch (\Exception $ex) {
                 $this->log(LogLevel::WARNING, " failed loading addon '{definition}': {message}", [
                     'definition' => $definitionFile,
@@ -283,14 +283,16 @@ class AddonManager implements LoggerAwareInterface, EventBindsInterface {
         $addonClass = $addon->getAddonClass();
         if ($addonClass) {
 
-            $this->log(LogLevel::INFO, "{$nest}   creating addon instance: {$addonClass}");
+            $this->log(LogLevel::INFO, "{$nest}  creating addon instance: {$addonClass}");
 
             // Get instance
             $instance = $this->di->getArgs($addonClass, [
                 new Reference([AbstractConfig::class, "addons.addon.{$addonName}"])
             ]);
+            $instance->setAddon($addon);
             $this->instances[$addonName] = $instance;
-            $instance->start();
+
+            $this->di->call([$instance, 'start']);
 
         }
 

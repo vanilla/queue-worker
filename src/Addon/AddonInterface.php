@@ -24,16 +24,9 @@ interface AddonInterface {
     public function setAddon(Addon $addon);
 
     /**
-     * Bind any required events
+     * Addon startup
+     * 
      */
     public function start();
-
-    /**
-     * Bind to an event
-     *
-     * @param string $event
-     * @param callable $handler
-     */
-    public function bind(string $event, callable $handler);
 
 }

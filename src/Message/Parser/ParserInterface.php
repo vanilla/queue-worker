@@ -21,16 +21,16 @@ interface ParserInterface {
     /**
      * Decode message body
      *
+     * @param array $rawMessage
      * @return Message
      */
-    public function decodeMessage($rawMessage): Message;
+    public function decodeMessage(array $rawMessage): Message;
 
     /**
      * Encode message body
      *
      * @param Message $message
-     * @return string
      */
-    public function encodeMessage(Message $message): string;
+    public function encodeMessage(Message $message);
 
 }

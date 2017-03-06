@@ -47,11 +47,11 @@ class MaintenanceWorker extends AbstractQueueWorker {
                 $this->log(LogLevel::ERROR, print_r($ex, true));
                 continue;
             }
-            $this->log(LogLevel::NOTICE, " queue backlog ({$queue['name']}): {$queue['backlog']}");
+            $this->log(LogLevel::INFO, " queue backlog ({$queue['name']}): {$queue['backlog']}");
         }
 
         $strategy = $this->di->get(AllocationStrategyInterface::class);
-        $this->log(LogLevel::NOTICE, " using strategy {class}",[
+        $this->log(LogLevel::INFO, " using strategy {class}",[
             'class' => get_class($strategy)
         ]);
 
@@ -61,9 +61,9 @@ class MaintenanceWorker extends AbstractQueueWorker {
         $this->cache->set(AbstractQueueWorker::QUEUE_DISTRIBUTION_KEY, $distribution);
 
         // Announce allocation
-        $this->log(LogLevel::NOTICE, " allocation");
+        $this->log(LogLevel::INFO, " allocation");
         foreach ($distribution as $slot => $queueNames) {
-            $this->log(LogLevel::NOTICE, sprintf("  slot %3d: %s", $slot, $queueNames));
+            $this->log(LogLevel::INFO, sprintf("  slot %3d: %s", $slot, $queueNames));
         }
 
         $this->log(LogLevel::NOTICE, " maintenance complete");

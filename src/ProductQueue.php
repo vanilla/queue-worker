@@ -10,6 +10,7 @@ namespace Vanilla\ProductQueue;
 use Vanilla\ProductQueue\Allocation\AllocationStrategyInterface;
 use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
 use Vanilla\ProductQueue\Addon\AddonManager;
+use Vanilla\ProductQueue\Message\Parser\ParserInterface;
 
 use Garden\Daemon\AppInterface;
 use Garden\Container\Container;
@@ -17,8 +18,8 @@ use Garden\Cli\Cli;
 use Garden\Cli\Args;
 
 use Kaecyra\AppCommon\AbstractConfig;
-use Kaecyra\AppCommon\Event\EventFiresInterface;
-use Kaecyra\AppCommon\Event\EventFiresTrait;
+use Kaecyra\AppCommon\Event\EventAwareInterface;
+use Kaecyra\AppCommon\Event\EventAwareTrait;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -35,11 +36,11 @@ use Psr\Log\LogLevel;
  * @package productqueue
  * @version 1.0
  */
-class ProductQueue implements AppInterface, LoggerAwareInterface, EventFiresInterface {
+class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInterface {
 
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
-    use EventFiresTrait;
+    use EventAwareTrait;
 
     /**
      * Dependency Injection Container
@@ -97,9 +98,14 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventFiresInte
         $this->addons = $addons;
 
         // Set worker allocation oversight strategy
-        $strategy = $this->config->get('queue.oversight.strategy');
+        $strategyClass = $this->config->get('queue.oversight.strategy');
         $this->di->rule(AllocationStrategyInterface::class);
-        $this->di->setClass($strategy);
+        $this->di->setClass($strategyClass);
+
+        // Set job parser
+        $parserClass = $this->config->get('queue.message.parser');
+        $this->di->rule(ParserInterface::class);
+        $this->di->setClass($parserClass);
 
         $this->cleanEnvironment();
     }

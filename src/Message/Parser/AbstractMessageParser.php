@@ -24,35 +24,38 @@ abstract class AbstractMessageParser implements ParserInterface {
      */
     public function extractMessageFields(array $rawMessage): array {
         $id = $rawMessage['id'];
-        $body = $rawMessage['body'];
+        $body = json_decode($rawMessage['body'], true);
+
+        // Extract extras from message
+        $extras = array_diff_key($rawMessage, [
+            'queue' => true,
+            'id'    => true,
+            'body'  => true
+        ]);
 
         $headers = [
             'queue' => $rawMessage['queue']
         ];
 
-        // Split body into body and headers
-        $parts = explode("\n\n", $body);
+        if (count($body) == 2) {
 
-        if (count($parts) > 1) {
-
-            // Decode headers
-            $rawHeaders = $parts[0];
-            $rawHeaders = explode("\n", $rawHeaders);
-            foreach ($rawHeaders as $rawHeader) {
-                $header = explode(":", $rawHeader, 2);
-                $headerName = strtolower($header[0]);
-                $headers[$headerName] = trim($header[1]);
-            }
+            // Get headers
+            $headers = array_merge($headers, $body[0]);
 
             // Get body
-            $body = $parts[1];
+            $body = $body[1];
 
         } else {
             // No headers, just body
             $body = $body;
         }
 
-        return [$id, $headers, $body];
+        return [
+            'id' => $id,
+            'headers' => $headers,
+            'body' => $body,
+            'extras' => $extras
+        ];
     }
 
 }
