@@ -11,7 +11,7 @@ namespace Vanilla\QueueWorker\Exception;
  * Message Exception: UnknownJob
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
 class UnknownJobException extends QueueMessageException {

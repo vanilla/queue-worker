@@ -17,10 +17,10 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 
 /**
- * ProductQueue Addon interface.
+ * Queue Worker Abstract addon base class
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @since 1.0
  */
 abstract class AbstractAddon implements AddonInterface, EventAwareInterface, LoggerAwareInterface {

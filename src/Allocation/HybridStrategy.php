@@ -15,7 +15,7 @@ namespace Vanilla\QueueWorker\Allocation;
  * first.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
 class HybridStrategy implements AllocationStrategyInterface {

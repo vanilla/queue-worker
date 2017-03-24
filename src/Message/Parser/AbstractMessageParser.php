@@ -11,7 +11,7 @@ namespace Vanilla\QueueWorker\Message\Parser;
  * Queue message parser interface
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
 abstract class AbstractMessageParser implements ParserInterface {

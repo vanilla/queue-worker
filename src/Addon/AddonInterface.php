@@ -8,10 +8,10 @@
 namespace Vanilla\QueueWorker\Addon;
 
 /**
- * ProductQueue Addon interface.
+ * Queue Worker Addon interface.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @since 1.0
  */
 interface AddonInterface {
@@ -25,7 +25,7 @@ interface AddonInterface {
 
     /**
      * Addon startup
-     * 
+     *
      */
     public function start();
 

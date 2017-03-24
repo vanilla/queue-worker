@@ -21,7 +21,7 @@ use Psr\Log\LoggerAwareTrait;
  * Queue job interface.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
 abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventAwareInterface {

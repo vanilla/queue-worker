@@ -21,10 +21,10 @@ use Garden\Container\Container;
 use Garden\Container\Reference;
 
 /**
- * ProductQueue Addon manager
+ * Queue Worker Addon manager
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @since 1.0
  */
 class AddonManager implements LoggerAwareInterface, EventAwareInterface {

@@ -24,7 +24,7 @@ use Psr\Log\LogLevel;
  * Abstract Worker base class
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
 abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareInterface {

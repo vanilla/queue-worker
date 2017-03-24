@@ -11,7 +11,7 @@ namespace Vanilla\QueueWorker\Addon;
  * Addon marker object
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @since 1.0
  */
 class Addon {

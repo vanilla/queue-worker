@@ -11,7 +11,7 @@ namespace Vanilla\QueueWorker\Message;
  * Queue message.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
 class Message {

@@ -13,7 +13,7 @@ use Vanilla\QueueWorker\Message\Message;
  * Native queue message parser
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
 class NativeMessageParser extends AbstractMessageParser {

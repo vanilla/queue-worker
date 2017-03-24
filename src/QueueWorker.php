@@ -32,15 +32,15 @@ use Psr\Log\LogLevel;
 /**
  * Payload Context
  *
- * ProductQueue is the asynchronous task running daemon for Vanilla's Hosted
- * environment. This class oversees each process and runs either a ProductWorker
+ * Queue Worker is an asynchronous task running daemon for executing jobs from
+ * message queues. This class oversees each process and runs either a ProductWorker
  * or a MaintenanceWorker when run() is called.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
-class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInterface {
+class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInterface {
 
     use LoggerAwareTrait;
     use LoggerBoilerTrait;

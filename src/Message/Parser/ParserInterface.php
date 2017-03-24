@@ -13,7 +13,7 @@ use Vanilla\QueueWorker\Message\Message;
  * Queue message parser interface
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
 interface ParserInterface {

@@ -13,7 +13,7 @@ use Vanilla\QueueWorker\Message\Message;
  * Message Exception: UnknownJob
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
 class QueueMessageException extends \Exception {

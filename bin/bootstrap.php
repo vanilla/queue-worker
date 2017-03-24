@@ -1,12 +1,13 @@
 <?php
 
 /**
- * ProductQueue bootstrap
+ * Queue worker bootstrap
  *
  * @license Proprietary
  * @copyright 2009-2016 Vanilla Forums Inc.
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
+ * @version 0.1.0
  */
 
 use Kaecyra\AppCommon\ConfigInterface;
@@ -25,9 +26,19 @@ use Garden\Daemon\Daemon;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 
-chdir(dirname(__FILE__));
+// Reflect on ourselves for the version
+$matched = preg_match('`@version ([\w\d\.-]+)$`im', file_get_contents(__FILE__), $matches);
+if (!$matched) {
+    echo "Unable to read version\n";
+    exit;
+}
+$version = $matches[1];
+define('APP_VERSION', $version);
 
-define('APP', 'productqueue');
+// Switch to queue root
+chdir(dirname($argv[0]));
+
+define('APP', 'queue-worker');
 define('PATH_ROOT', getcwd());
 date_default_timezone_set('UTC');
 
@@ -52,19 +63,17 @@ define('PATH_CONFIG', PATH_ROOT.'/conf');
 
 // Include the core autoloader.
 
-$autoloader = __DIR__.'/vendor/autoload.php';
-if (!file_exists($autoloader)) {
-    echo "Generating autoloader...\n";
-    $compose = "sudo composer install --no-dev --prefer-dist --optimize-autoloader";
-    exec($compose);
-
-    if (!file_exists($autoloader)) {
-        echo "Unable to automatically generate autoloader.\n";
-        echo " Try: {$compose}\n";
-        exit;
+$paths = [
+    __DIR__.'/../vendor/autoload.php',  // locally
+    __DIR__.'/../../../autoload.php'    // dependency
+];
+foreach ($paths as $path) {
+    if (file_exists($path)) {
+        echo " including {$path}\n";
+        require_once $path;
+        break;
     }
 }
-require_once $autoloader;
 
 // Prepare Dependency Injection
 
@@ -97,7 +106,7 @@ $di
             'appdir'            => PATH_ROOT,
             'appdescription'    => 'Vanilla Product Queue',
             'appnamespace'      => 'Vanilla\\QueueWorker',
-            'appname'           => 'ProductQueue',
+            'appname'           => 'QueueWorker',
             'authorname'        => 'Tim Gunter',
             'authoremail'       => 'tim@vanillaforums.com'
         ],

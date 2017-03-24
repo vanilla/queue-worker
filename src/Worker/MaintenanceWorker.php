@@ -15,7 +15,7 @@ use Psr\Log\LogLevel;
  * Maintenance Worker
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package productqueue
+ * @package queue-worker
  * @version 1.0
  */
 class MaintenanceWorker extends AbstractQueueWorker {
