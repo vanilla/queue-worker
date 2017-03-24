@@ -1,9 +1,9 @@
 {
-    "name": "vanilla/productqueue",
-    "description": "Vanilla Hosted Message Queue Runner",
-    "keywords": ["vanilla","queue","vanillaforums"],
-    "homepage": "https://github.com/vanilla/productqueue",
-    "type": "project",
+    "name": "vanilla/queue-worker",
+    "description": "Vanilla distributed message queue worker",
+    "keywords": ["vanilla","queue","worker","distributed"],
+    "homepage": "https://github.com/vanilla/queue-worker",
+    "type": "library",
     "license": "proprietary",
     "authors": [
         {
@@ -28,22 +28,19 @@
         {
             "type": "git",
             "url": "https://github.com/vanilla/queue-interop"
-        },
-        {
-            "type": "git",
-            "url": "https://github.com/mariano/disque-php"
         }
     ],
     "require": {
         "php": ">=7.0",
         "kaecyra/app-common": "dev-master",
         "container-interop/container-interop": "^1.1",
-        "vanilla/garden-container": "dev-master",
+        "vanilla/garden-container": "^1.3",
         "vanilla/garden-daemon": "dev-master",
         "vanilla/garden-cli": "^1.6",
+        "vanilla/garden-http": "^1.1",
         "vanilla/queue-interop": "dev-master",
-        "psr/log": "~1.0",
-        "mariano/disque-php": "dev-master"
+        "psr/log": "^1.0",
+        "mariano/disque-php": "^2.0"
     },
     "autoload": {
         "psr-4": { 

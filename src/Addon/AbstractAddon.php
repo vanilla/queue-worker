@@ -54,4 +54,11 @@ abstract class AbstractAddon implements AddonInterface, EventAwareInterface, Log
         $this->addon = $addon;
     }
 
+    /**
+     * Do nothing
+     */
+    public function start() {
+
+    }
+
 }

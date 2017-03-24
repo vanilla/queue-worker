@@ -12,7 +12,11 @@ use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
 use Vanilla\ProductQueue\Addon\AddonManager;
 use Vanilla\ProductQueue\Message\Parser\ParserInterface;
 
+use Vanilla\ProductQueue\Error\FatalErrorHandler;
+use Vanilla\ProductQueue\Error\LogErrorHandler;
+
 use Garden\Daemon\AppInterface;
+use Garden\Daemon\ErrorHandler;
 use Garden\Container\Container;
 use Garden\Cli\Cli;
 use Garden\Cli\Args;
@@ -90,8 +94,16 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
      * @param Container $di
      * @param Cli $cli
      * @param AbstractConfig $config
+     * @param AddonManager $addons
+     * @param ErrorHandler $errorHandler
      */
-    public function __construct(Container $di, Cli $cli, AbstractConfig $config, AddonManager $addons) {
+    public function __construct(
+        Container $di,
+        Cli $cli,
+        AbstractConfig $config,
+        AddonManager $addons,
+        ErrorHandler $errorHandler
+    ) {
         $this->di = $di;
         $this->cli = $cli;
         $this->config = $config;
@@ -106,6 +118,14 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
         $parserClass = $this->config->get('queue.message.parser');
         $this->di->rule(ParserInterface::class);
         $this->di->setClass($parserClass);
+
+        // Add logging error handler
+        $logHandler = $this->di->get(LogErrorHandler::class);
+        $errorHandler->addHandler([$logHandler, 'error'], E_ALL);
+
+        // Add fatal error handler
+        $fatalHandler = $this->di->get(FatalErrorHandler::class);
+        $errorHandler->addHandler([$fatalHandler, 'error']);
 
         $this->cleanEnvironment();
     }
@@ -153,6 +173,8 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
         $this->getLogger()->enableLogger('persist');
 
         $this->addons->startAddons($this->config->get('addons.active'));
+
+        $this->fire('queueStart');
     }
 
     /**
@@ -253,8 +275,20 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
      * @return boolean
      */
     public function reapedWorker($pid, $realm): bool {
+        $this->log(LogLevel::DEBUG, "Recovered worker in realm '{realm}' with pid '{pid}'", [
+            'realm' => $realm,
+            'pid' => $pid
+        ]);
+
         foreach ($this->workers as $slot => &$workerPid) {
+            $this->log(LogLevel::DEBUG, " checking worker: {pid}", [
+                'pid' => $workerPid
+            ]);
+
             if ($pid === $workerPid) {
+                $this->log(LogLevel::DEBUG, " worker slot {slot} freed", [
+                    'slot' => $slot
+                ]);
                 $workerPid = null;
                 return true;
             }
@@ -282,41 +316,6 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
         // Prepare worker environment
         $this->worker = $this->di->get($workerClass);
         $this->worker->run($workerConfig);
-    }
-
-    /**
-     * Handle errors
-     *
-     * @param int $errorLevel
-     * @param string $message
-     * @param string $file
-     * @param int $line
-     * @param array $context
-     */
-    public function errorHandler($errorLevel , $message, $file, $line, $context) {
-
-        $errorFormat = "Error on line {line} of {file}:\n{message}";
-        $btData = "";
-        $exception = false;
-        if ($errorLevel & (E_RECOVERABLE_ERROR | E_ERROR | E_USER_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_PARSE)) {
-            // Generate backtrace
-            $backtrace = debug_backtrace();
-
-            $btData = $backtrace[0];
-            $errorFormat .= "\n{bt}";
-            $exception = true;
-        }
-
-        $this->log($this->phpErrorLevel($errorLevel), $errorFormat, [
-            'file' => $file,
-            'line' => $line,
-            'message' => $message,
-            'bt' => $btData
-        ]);
-
-        if ($exception) {
-            throw new \Garden\Daemon\ErrorException($message, $errorLevel , $file, $line, $context, $backtrace);
-        }
     }
 
 }

@@ -14,6 +14,6 @@ namespace Vanilla\ProductQueue\Exception;
  * @package productqueue
  * @version 1.0
  */
-class BrokenMessageException extends \Exception {
+class BrokenMessageException extends QueueMessageException {
 
 }

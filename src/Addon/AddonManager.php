@@ -78,13 +78,13 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
         // Prepare autoloader caching
         $this->autoload = [];
 
+        // Load things
+        spl_autoload_register([$this, 'autoload']);
+
         // Add scanned dirs
         foreach ($scanDirs as $dir) {
             $this->addSource($dir);
         }
-
-        // Load things
-        spl_autoload_register([$this, 'autoload']);
     }
 
     /**
@@ -111,9 +111,6 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
         if (is_dir($sourceDir)) {
             $this->sources[] = $sourceDir;
         }
-
-        // Scan source
-        $this->scanSource($sourceDir);
 
         return $this;
     }
@@ -181,6 +178,9 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      */
     public function startAddons($addons) {
 
+        // Scan source folders
+        $this->scanSourceFolders();
+
         $this->log(LogLevel::NOTICE, "Starting addons");
 
         // Include and instantiate active addons
@@ -207,7 +207,7 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
 
         $nest = str_repeat(' ', $level);
 
-        $this->log(LogLevel::INFO, "{$nest} start addon: {addon}", [
+        $this->log(LogLevel::NOTICE, "{$nest} start addon: {addon}", [
             'addon' => $addonName
         ]);
 
@@ -260,7 +260,7 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
                     // Try to load addon if available
                     $loadedRequirement = false;
                     if ($this->isAvailable($requiredAddon)) {
-                        $loadedRequirement = $this->load($requiredAddon, $level+1);
+                        $loadedRequirement = $this->startAddon($requiredAddon, $level+1);
                     }
 
                     $loadedAllRequirements &= $loadedRequirement;
@@ -291,8 +291,7 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
             ]);
             $instance->setAddon($addon);
             $this->instances[$addonName] = $instance;
-
-            $this->di->call([$instance, 'start']);
+            $instance->start();
 
         }
 

@@ -25,5 +25,6 @@ class JobStatus {
     const FAILED = 'failed';
     const MISMATCH = 'mismatch';
     const ABANDONED = 'abandoned';
+    const ERROR = 'error';
 
 }

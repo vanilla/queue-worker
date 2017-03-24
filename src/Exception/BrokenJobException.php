@@ -14,7 +14,7 @@ namespace Vanilla\ProductQueue\Exception;
  * @package productqueue
  * @version 1.0
  */
-class BrokenJobException extends \Exception {
+class BrokenJobException extends QueueMessageException {
 
     /**
      * Get job payload name
@@ -22,7 +22,7 @@ class BrokenJobException extends \Exception {
      * @return string
      */
     public function getJob(): string {
-        return $this->getMessage();
+        return $this->getQueueMessage()->getPayloadType();
     }
 
 }

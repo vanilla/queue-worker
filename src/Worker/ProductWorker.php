@@ -131,7 +131,7 @@ class ProductWorker extends AbstractQueueWorker {
         // Connect to queues and cache
         $this->prepareWorker();
 
-        $this->fire('workerReady', [$this]);
+        $this->fire('workerReady', [$this, $this->di]);
     }
 
     /**
@@ -201,56 +201,65 @@ class ProductWorker extends AbstractQueueWorker {
 
                 // Unable to load job matching payload type
 
-                $this->log(LogLevel::WARNING, "Unknown job: {job}", [
-                    'job' => $ex->getJob()
+                $this->log(LogLevel::WARNING, "Unknown job [{job}]: {reason}", [
+                    'job'       => $ex->getJob(),
+                    'reason'    => $ex->getMessage()
                 ]);
                 $jobStatus = JobStatus::MISMATCH;
+                $reason = $ex->getMessage();
 
             } catch (BrokenJobException $ex) {
 
                 // Payload type matches object that is not a valid job
 
-                $this->log(LogLevel::WARNING, "Broken job: {job}", [
-                    'job' => $ex->getJob()
+                $this->log(LogLevel::WARNING, "Broken job [{job}]: {reason}", [
+                    'job'       => $ex->getJob(),
+                    'reason'    => $ex->getMessage()
                 ]);
                 $jobStatus = JobStatus::INVALID;
+                $reason = $ex->getMessage();
 
             } catch (BrokenMessageException $ex) {
 
                 // Message could not be processed within the allotted retry count
 
-                $this->log(LogLevel::WARNING, "Broken message: {reason}", [
-                    'reason' => $ex->getMessage()
+                $this->log(LogLevel::WARNING, "Broken message [{job}]: {reason}", [
+                    'job'       => $ex->getJob(),
+                    'reason'    => $ex->getMessage()
                 ]);
                 $jobStatus = JobStatus::ABANDONED;
+                $reason = $ex->getMessage();
 
-            } catch (\Exception $ex) {
+            } catch (\Throwable $ex) {
 
-                // General exception
+                // PHP error
 
-                $this->log(LogLevel::WARNING, "Exception: {exception}", [
-                    'exception' => $ex->getMessage()
-                ]);
-                $jobStatus = JobStatus::RETRY;
+                $this->logException($ex);
+                $jobStatus = JobStatus::ERROR;
+                $reason = $ex->getMessage();
 
             } finally {
                 $message = $message ?? null;
                 $job = $job ?? null;
-                $jobStatus = $jobStatus ?? null;
+                $jobStatus = $jobStatus ?? JobStatus::ERROR;
+                $reason = $reason ?? null;
             }
 
             $this->fire('endJob', [$message, $job, $jobStatus]);
 
+            // Handle end state for jobs
+
             if (in_array($jobStatus, [
                 JobStatus::INVALID,
-                JobStatus::ABANDONED
+                JobStatus::ABANDONED,
+                JobStatus::ERROR
             ])) {
-
-                // Dead letter handler
-                $this->failedMessage($message);
 
                 // ACK failed message (will not retry)
                 $this->queue->ackJob($message->getID());
+
+                // Dead letter handler
+                $this->failedMessage($message, $jobStatus, $reason);
 
             } else if ($jobStatus != JobStatus::COMPLETE) {
 
@@ -279,7 +288,9 @@ class ProductWorker extends AbstractQueueWorker {
         // Got a message, so decrement iterations
         $this->iterations--;
 
-        $this->log(LogLevel::DEBUG, "Got message from queue");
+        $this->log(LogLevel::DEBUG, "[{slot}] Got message from queue", [
+            'slot'  => $this->getSlot()
+        ]);
         $this->log(LogLevel::DEBUG, print_r($rawMessage, true));
 
         // Get message object
@@ -306,11 +317,14 @@ class ProductWorker extends AbstractQueueWorker {
         $workerDI = clone $this->di;
         $workerDI->setInstance(ContainerInterface::class, $workerDI);
 
+        $this->fire('prepareJobEnvironment', [$message, $workerDI]);
+
         // Convert message to runnable job
         $job = $this->getJob($message, $workerDI);
 
-        $this->log(LogLevel::NOTICE, "Resolved job: {job}", [
-            'job' => $job->getName()
+        $this->log(LogLevel::NOTICE, "[{slot}] Resolved job: {job}", [
+            'slot'  => $this->getSlot(),
+            'job'   => $job->getName()
         ]);
 
         $this->fire('gotJob', [$job]);
@@ -339,7 +353,7 @@ class ProductWorker extends AbstractQueueWorker {
         //$nacks = $message->getExtra('nacks');
         $deliveries = $message->getExtra('additional-deliveries');
         if ($deliveries > $this->retries) {
-            throw new BrokenMessageException();
+            throw new BrokenMessageException($message, "too many retries");
         }
     }
 
@@ -354,12 +368,12 @@ class ProductWorker extends AbstractQueueWorker {
 
         // Check that the specified job exists
         if (!$workerDI->has($payloadType)) {
-            throw new UnknownJobException($payloadType);
+            throw new UnknownJobException($message, "specified job class cannot be found");
         }
 
         // Check that the job is legal
         if (!is_a($payloadType, 'Vanilla\ProductQueue\Job\JobInterface', true)) {
-            throw new BrokenJobException($payloadType);
+            throw new BrokenJobException($message, "specified job class does not implement JobInterface");
         }
 
         // Create job instance
@@ -375,9 +389,44 @@ class ProductWorker extends AbstractQueueWorker {
      * cannot be retried.
      *
      * @param Message $message
+     * @param string $level
+     * @param string $reason optional
      */
-    public function failedMessage(Message $message) {
-        $this->fire('failedMessage', [$message]);
+    public function failedMessage(Message $message, string $level, string $reason = null) {
+        $this->log(LogLevel::WARNING, "Message could not be handled [{job}]: {reason}", [
+            'job'       => $message->getPayloadType(),
+            'level'     => $level,
+            'reason'    => $reason
+        ]);
+
+        $this->fire('failedMessage', [$message, $level, $reason]);
+    }
+
+    /**
+     * Log severe problems
+     *
+     * @param \Throwable $ex
+     */
+    public function logException(\Throwable $ex) {
+        $errorFormat = "PHP {levelString}: {message} in {file} on line {line}";
+
+        // Log locally
+        $level = $this->phpErrorLevel($ex->getCode());
+        $this->log($level, $errorFormat, [
+            'level' => $level,
+            'levelString' => ucfirst($level),
+            'message' => $ex->getMessage(),
+            'file' => $ex->getFile(),
+            'line' => $ex->getLine()
+        ]);
+
+        // Fire hookable log event
+        $this->fire('fatalError', [[
+            'level'     => $level,
+            'message'   => $ex->getMessage(),
+            'file'      => $ex->getFile(),
+            'line'      => $ex->getLine()
+        ]]);
     }
 
 }
