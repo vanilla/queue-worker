@@ -5,15 +5,15 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue;
+namespace Vanilla\QueueWorker;
 
-use Vanilla\ProductQueue\Allocation\AllocationStrategyInterface;
-use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
-use Vanilla\ProductQueue\Addon\AddonManager;
-use Vanilla\ProductQueue\Message\Parser\ParserInterface;
+use Vanilla\QueueWorker\Allocation\AllocationStrategyInterface;
+use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
+use Vanilla\QueueWorker\Addon\AddonManager;
+use Vanilla\QueueWorker\Message\Parser\ParserInterface;
 
-use Vanilla\ProductQueue\Error\FatalErrorHandler;
-use Vanilla\ProductQueue\Error\LogErrorHandler;
+use Vanilla\QueueWorker\Error\FatalErrorHandler;
+use Vanilla\QueueWorker\Error\LogErrorHandler;
 
 use Garden\Daemon\AppInterface;
 use Garden\Daemon\ErrorHandler;
@@ -72,7 +72,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
 
     /**
      * Addon manager
-     * @var \Vanilla\ProductQueue\Addon\AddonManager
+     * @var \Vanilla\QueueWorker\Addon\AddonManager
      */
     protected $addons;
 
@@ -219,7 +219,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
 
             return [
                 'worker'    => 'maintenance',
-                'class'     => '\\Vanilla\\ProductQueue\\Worker\\MaintenanceWorker'
+                'class'     => '\\Vanilla\\QueueWorker\\Worker\\MaintenanceWorker'
             ];
         }
 
@@ -230,7 +230,7 @@ class ProductQueue implements AppInterface, LoggerAwareInterface, EventAwareInte
 
         return [
             'worker'    => 'product',
-            'class'     => '\\Vanilla\\ProductQueue\\Worker\\ProductWorker',
+            'class'     => '\\Vanilla\\QueueWorker\\Worker\\ProductWorker',
             'slot'      => $slot
         ];
     }

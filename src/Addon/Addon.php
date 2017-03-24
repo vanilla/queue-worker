@@ -5,7 +5,7 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue\Addon;
+namespace Vanilla\QueueWorker\Addon;
 
 /**
  * Addon marker object

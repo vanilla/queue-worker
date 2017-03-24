@@ -6,7 +6,7 @@
  * @license MIT
  */
 
-namespace Vanilla\ProductQueue\Log;
+namespace Vanilla\QueueWorker\Log;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;

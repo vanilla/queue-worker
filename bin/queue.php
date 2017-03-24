@@ -12,7 +12,7 @@
  * @version 1.0
  */
 
-namespace Vanilla\ProductQueue;
+namespace Vanilla\QueueWorker;
 
 use \Garden\Daemon\Daemon;
 

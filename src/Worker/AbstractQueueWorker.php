@@ -5,10 +5,10 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue\Worker;
+namespace Vanilla\QueueWorker\Worker;
 
-use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
-use Vanilla\ProductQueue\Message\Parser\ParserInterface;
+use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
+use Vanilla\QueueWorker\Message\Parser\ParserInterface;
 
 use Garden\Container\Container;
 

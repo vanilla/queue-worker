@@ -5,9 +5,9 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue\Worker;
+namespace Vanilla\QueueWorker\Worker;
 
-use Vanilla\ProductQueue\Allocation\AllocationStrategyInterface;
+use Vanilla\QueueWorker\Allocation\AllocationStrategyInterface;
 
 use Psr\Log\LogLevel;
 

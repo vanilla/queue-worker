@@ -15,7 +15,7 @@ use Kaecyra\AppCommon\ConfigCollection;
 
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 
-use Vanilla\ProductQueue\Addon\AddonManager;
+use Vanilla\QueueWorker\Addon\AddonManager;
 
 use Garden\Container\Container;
 use Garden\Container\Reference;
@@ -96,7 +96,7 @@ $di
             'appversion'        => APP_VERSION,
             'appdir'            => PATH_ROOT,
             'appdescription'    => 'Vanilla Product Queue',
-            'appnamespace'      => 'Vanilla\\ProductQueue',
+            'appnamespace'      => 'Vanilla\\QueueWorker',
             'appname'           => 'ProductQueue',
             'authorname'        => 'Tim Gunter',
             'authoremail'       => 'tim@vanillaforums.com'

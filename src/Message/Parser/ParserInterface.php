@@ -5,9 +5,9 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue\Message\Parser;
+namespace Vanilla\QueueWorker\Message\Parser;
 
-use Vanilla\ProductQueue\Message\Message;
+use Vanilla\QueueWorker\Message\Message;
 
 /**
  * Queue message parser interface

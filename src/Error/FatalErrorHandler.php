@@ -5,9 +5,9 @@
  * @copyright 2016 Tim Gunter
  */
 
-namespace Vanilla\ProductQueue\Error;
+namespace Vanilla\QueueWorker\Error;
 
-use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
+use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 
 use Garden\Daemon\ErrorHandlerInterface;
 

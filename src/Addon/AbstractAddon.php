@@ -5,9 +5,9 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue\Addon;
+namespace Vanilla\QueueWorker\Addon;
 
-use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
+use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 
 use Kaecyra\AppCommon\Event\EventManager;
 use Kaecyra\AppCommon\Event\EventAwareInterface;

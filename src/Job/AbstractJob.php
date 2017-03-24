@@ -5,9 +5,9 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue\Job;
+namespace Vanilla\QueueWorker\Job;
 
-use Vanilla\ProductQueue\Log\LoggerBoilerTrait;
+use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 
 use Garden\Container\Container;
 

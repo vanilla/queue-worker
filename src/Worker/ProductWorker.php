@@ -5,16 +5,16 @@
  * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
-namespace Vanilla\ProductQueue\Worker;
+namespace Vanilla\QueueWorker\Worker;
 
-use Vanilla\ProductQueue\Message\Message;
-use Vanilla\ProductQueue\Job\AbstractJob;
-use Vanilla\ProductQueue\Job\JobStatus;
-use Vanilla\ProductQueue\Job\JobInterface;
+use Vanilla\QueueWorker\Message\Message;
+use Vanilla\QueueWorker\Job\AbstractJob;
+use Vanilla\QueueWorker\Job\JobStatus;
+use Vanilla\QueueWorker\Job\JobInterface;
 
-use Vanilla\ProductQueue\Exception\UnknownJobException;
-use Vanilla\ProductQueue\Exception\BrokenMessageException;
-use Vanilla\ProductQueue\Exception\BrokenJobException;
+use Vanilla\QueueWorker\Exception\UnknownJobException;
+use Vanilla\QueueWorker\Exception\BrokenMessageException;
+use Vanilla\QueueWorker\Exception\BrokenJobException;
 
 use Garden\Container\Container;
 
@@ -372,7 +372,7 @@ class ProductWorker extends AbstractQueueWorker {
         }
 
         // Check that the job is legal
-        if (!is_a($payloadType, 'Vanilla\ProductQueue\Job\JobInterface', true)) {
+        if (!is_a($payloadType, 'Vanilla\QueueWorker\Job\JobInterface', true)) {
             throw new BrokenJobException($message, "specified job class does not implement JobInterface");
         }
 
