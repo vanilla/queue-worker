@@ -102,7 +102,7 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      * @version 0.1.0
      */
     public static function bootstrap() {
-        global $di, $argv;
+        global $di, $logger;
 
         // Reflect on ourselves for the version
         $matched = preg_match('`@version ([\w\d\.-]+)$`im', file_get_contents(__FILE__), $matches);
