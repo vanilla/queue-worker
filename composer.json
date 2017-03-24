@@ -30,6 +30,12 @@
             "url": "https://github.com/vanilla/queue-interop"
         }
     ],
+    "config": {
+        "bin-dir": "./"
+    },
+    "bin": [
+        "bin/queue.php"
+    ],
     "require": {
         "php": ">=7.0",
         "kaecyra/app-common": "dev-master",
