@@ -15,8 +15,24 @@
 namespace Vanilla\QueueWorker;
 
 use \Garden\Daemon\Daemon;
-
 use \Psr\Log\LogLevel;
+
+// Switch to queue root
+chdir(dirname($argv[0]));
+
+// Include the core autoloader.
+
+$paths = [
+    __DIR__.'/../vendor/autoload.php',  // locally
+    __DIR__.'/../../../autoload.php'    // dependency
+];
+foreach ($paths as $path) {
+    if (file_exists($path)) {
+        echo " including {$path}\n";
+        require_once $path;
+        break;
+    }
+}
 
 // Run bootstrap
 QueueWorker::bootstrap();

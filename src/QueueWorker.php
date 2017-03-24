@@ -113,9 +113,6 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
         $version = $matches[1];
         define('APP_VERSION', $version);
 
-        // Switch to queue root
-        chdir(dirname($argv[0]));
-
         define('APP', 'queue-worker');
         define('PATH_ROOT', getcwd());
         date_default_timezone_set('UTC');
@@ -138,20 +135,6 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
         ini_set('track_errors', 1);
 
         define('PATH_CONFIG', PATH_ROOT.'/conf');
-
-        // Include the core autoloader.
-
-        $paths = [
-            __DIR__.'/../vendor/autoload.php',  // locally
-            __DIR__.'/../../../autoload.php'    // dependency
-        ];
-        foreach ($paths as $path) {
-            if (file_exists($path)) {
-                echo " including {$path}\n";
-                require_once $path;
-                break;
-            }
-        }
 
         // Prepare Dependency Injection
 
