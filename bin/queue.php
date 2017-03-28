@@ -28,7 +28,6 @@ $paths = [
 ];
 foreach ($paths as $path) {
     if (file_exists($path)) {
-        echo " including {$path}\n";
         require_once $path;
         break;
     }
