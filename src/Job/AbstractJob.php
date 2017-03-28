@@ -31,12 +31,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     use EventAwareTrait;
 
     /**
-     * Dependency Injection Container
-     * @var Container
-     */
-    protected $di;
-
-    /**
      * Job execution status
      * @var string
      */
@@ -47,9 +41,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      * @param Container $di
      */
-    public function __construct(Container $di) {
-        $this->di = $di;
-
+    public function __construct() {
         $this->setStatus(JobStatus::RECEIVED);
     }
 
