@@ -9,7 +9,6 @@ namespace Vanilla\QueueWorker\Addon;
 
 use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 
-use Kaecyra\AppCommon\Event\EventManager;
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
 

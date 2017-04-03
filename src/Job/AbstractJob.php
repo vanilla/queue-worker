@@ -31,10 +31,22 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     use EventAwareTrait;
 
     /**
+     * Job message ID
+     * @var string
+     */
+    protected $id;
+
+    /**
      * Job execution status
      * @var string
      */
     protected $status;
+
+    /**
+     * Job data
+     * @var array
+     */
+    protected $data;
 
     /**
      * Prepare job
@@ -43,6 +55,24 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      */
     public function __construct() {
         $this->setStatus(JobStatus::RECEIVED);
+    }
+
+    /**
+     * Set job id
+     *
+     * @param string $id
+     */
+    public function setID(string $id) {
+        $this->id = $id;
+    }
+
+    /**
+     * Get job ID
+     *
+     * @return string
+     */
+    public function getID(): string {
+        return $this->id;
     }
 
     /**
