@@ -39,7 +39,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
      * Dependency Injection Container
      * @var \Psr\Container\ContainerInterface;
      */
-    protected $di;
+    protected $container;
 
     /**
      * App configuration
@@ -83,7 +83,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
      * @param Container $di
      */
     public function __construct(ContainerInterface $di, AbstractConfig $config) {
-        $this->di = $di;
+        $this->container = $di;
         $this->config = $config;
         $this->queues = null;
     }
@@ -170,7 +170,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
             $this->cache->addServer($node[0], $node[1]);
         }
 
-        $this->di->setInstance(\Memcached::class, $this->cache);
+        $this->container->setInstance(\Memcached::class, $this->cache);
 
         // Prepare queue driver
 
@@ -185,23 +185,23 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
                 'server'    => $node[0],
                 'port'      => $node[1]
             ]);
-            $node = $this->di->getArgs(\Disque\Connection\Credentials::class, $node);
+            $node = $this->container->getArgs(\Disque\Connection\Credentials::class, $node);
         }
         $this->queue = new \Disque\Client($queueNodes);
         $this->queue->connect();
 
-        $this->di->setInstance(\Disque\Client::class, $this->queue);
+        $this->container->setInstance(\Disque\Client::class, $this->queue);
 
         // Prepare queue message parser
 
-        $this->parser = $this->di->get(ParserInterface::class);
+        $this->parser = $this->container->get(ParserInterface::class);
         $this->log(LogLevel::INFO, " using parser {class}",[
             'class' => get_class($this->parser)
         ]);
 
         // Don't share jobs
 
-        $this->di->rule(AbstractJob::class)
+        $this->container->rule(AbstractJob::class)
             ->setShared(false);
     }
 

@@ -50,7 +50,7 @@ class MaintenanceWorker extends AbstractQueueWorker {
             $this->log(LogLevel::INFO, " queue backlog ({$queue['name']}): {$queue['backlog']}");
         }
 
-        $strategy = $this->di->get(AllocationStrategyInterface::class);
+        $strategy = $this->container->get(AllocationStrategyInterface::class);
         $this->log(LogLevel::INFO, " using strategy {class}",[
             'class' => get_class($strategy)
         ]);

@@ -39,7 +39,7 @@ QueueWorker::bootstrap();
 $exitCode = 0;
 try {
 
-    $daemon = $di->get(Daemon::class);
+    $daemon = $container->get(Daemon::class);
     $exitCode = $daemon->attach($argv);
 
 } catch (\Garden\Daemon\Exception $ex) {

@@ -55,7 +55,7 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      * Dependency Injection Container
      * @var ContainerInterface
      */
-    protected $di;
+    protected $container;
 
     /**
      * Commandline handler
@@ -103,7 +103,7 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      * @version 0.1.0
      */
     public static function bootstrap() {
-        global $di, $logger;
+        global $container, $logger;
 
         // Reflect on ourselves for the version
         $matched = preg_match('`@version ([\w\d\.-]+)$`im', file_get_contents(__FILE__), $matches);
@@ -139,8 +139,8 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
 
         // Prepare Dependency Injection
 
-        $di = new Container;
-        $di
+        $container = new Container;
+        $container
             ->rule(ContainerInterface::class)
             ->addAlias(Container::class)
             ->setClass(Container::class)
@@ -183,57 +183,57 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
         // Set up loggers
 
         $logger = new \Kaecyra\AppCommon\Log\AggregateLogger;
-        $logLevel = $di->get(AbstractConfig::class)->get('log.level');
-        $loggers = $di->get(AbstractConfig::class)->get('log.loggers');
+        $logLevel = $container->get(AbstractConfig::class)->get('log.level');
+        $loggers = $container->get(AbstractConfig::class)->get('log.loggers');
         foreach ($loggers as $logConfig) {
             $loggerClass = "Kaecyra\\AppCommon\\Log\\".ucfirst($logConfig['destination']).'Logger';
-            if ($di->has($loggerClass)) {
-                $subLogger = $di->getArgs($loggerClass, [PATH_ROOT, $logConfig]);
+            if ($container->has($loggerClass)) {
+                $subLogger = $container->getArgs($loggerClass, [PATH_ROOT, $logConfig]);
                 $logger->addLogger($subLogger, $logConfig['level'] ?? $logLevel, $logConfig['key'] ?? null);
             }
         }
 
         $logger->disableLogger('persist');
-        $di->setInstance(LoggerInterface::class, $logger);
+        $container->setInstance(LoggerInterface::class, $logger);
     }
 
     /**
      * Construct app
      *
-     * @param ContainerInterface $di
+     * @param ContainerInterface $container
      * @param Cli $cli
      * @param AbstractConfig $config
      * @param AddonManager $addons
      * @param ErrorHandler $errorHandler
      */
     public function __construct(
-        ContainerInterface $di,
+        ContainerInterface $container,
         Cli $cli,
         AbstractConfig $config,
         AddonManager $addons,
         ErrorHandler $errorHandler
     ) {
-        $this->di = $di;
+        $this->container = $container;
         $this->cli = $cli;
         $this->config = $config;
         $this->addons = $addons;
 
         // Set worker allocation oversight strategy
         $strategyClass = $this->config->get('queue.oversight.strategy');
-        $this->di->rule(AllocationStrategyInterface::class);
-        $this->di->setClass($strategyClass);
+        $this->container->rule(AllocationStrategyInterface::class);
+        $this->container->setClass($strategyClass);
 
         // Set job parser
         $parserClass = $this->config->get('queue.message.parser');
-        $this->di->rule(ParserInterface::class);
-        $this->di->setClass($parserClass);
+        $this->container->rule(ParserInterface::class);
+        $this->container->setClass($parserClass);
 
         // Add logging error handler
-        $logHandler = $this->di->get(LogErrorHandler::class);
+        $logHandler = $this->container->get(LogErrorHandler::class);
         $errorHandler->addHandler([$logHandler, 'error'], E_ALL);
 
         // Add fatal error handler
-        $fatalHandler = $this->di->get(FatalErrorHandler::class);
+        $fatalHandler = $this->container->get(FatalErrorHandler::class);
         $errorHandler->addHandler([$fatalHandler, 'error']);
 
         $this->cleanEnvironment();
@@ -423,7 +423,7 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
         $workerClass = $workerConfig['class'];
 
         // Prepare worker environment
-        $this->worker = $this->di->get($workerClass);
+        $this->worker = $this->container->get($workerClass);
         $this->worker->run($workerConfig);
     }
 

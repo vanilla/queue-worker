@@ -37,7 +37,7 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      * Dependency Injection Container
      * @var ContainerInterface
      */
-    protected $di;
+    protected $container;
 
     /**
      * List of source folders
@@ -69,8 +69,8 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      */
     protected $autoload;
 
-    public function __construct(ContainerInterface $di, array $scanDirs) {
-        $this->di = $di;
+    public function __construct(ContainerInterface $container, array $scanDirs) {
+        $this->container = $container;
         $this->sources = [];
         $this->addons = [];
         $this->enabled = [];
@@ -286,7 +286,7 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
             $this->log(LogLevel::INFO, "{$nest}  creating addon instance: {$addonClass}");
 
             // Get instance
-            $instance = $this->di->getArgs($addonClass, [
+            $instance = $this->container->getArgs($addonClass, [
                 new Reference([AbstractConfig::class, "addons.addon.{$addonName}"])
             ]);
             $instance->setAddon($addon);
