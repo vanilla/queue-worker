@@ -1,0 +1,392 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "2e88fe292a230d7e33fb1aadcb15297e",
+    "packages": [
+        {
+            "name": "kaecyra/app-common",
+            "version": "v1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kaecyra/app-common.git",
+                "reference": "f94615dc904e5725ae2cefebcb83f5776d55ed90"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kaecyra/app-common/zipball/f94615dc904e5725ae2cefebcb83f5776d55ed90",
+                "reference": "f94615dc904e5725ae2cefebcb83f5776d55ed90",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0",
+                "psr/container": "^1.0",
+                "psr/log": "~1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Kaecyra\\AppCommon\\": "src"
+                },
+                "files": [
+                    "src/map/functions.general.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tim Gunter",
+                    "email": "tim@vanillaforums.com",
+                    "homepage": "https://vanillaforums.com"
+                }
+            ],
+            "description": "Common app base.",
+            "homepage": "https://github.com/kaecyra/app-common",
+            "keywords": [
+                "app-common"
+            ],
+            "time": "2017-06-22T20:15:04+00:00"
+        },
+        {
+            "name": "mariano/disque-php",
+            "version": "2.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mariano/disque-php.git",
+                "reference": "33dcf6f59e7b39b76205dfc881dd7674731f01c2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mariano/disque-php/zipball/33dcf6f59e7b39b76205dfc881dd7674731f01c2",
+                "reference": "33dcf6f59e7b39b76205dfc881dd7674731f01c2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5"
+            },
+            "require-dev": {
+                "mockery/mockery": "0.9.*",
+                "phpunit/phpunit": "~4.6",
+                "scrutinizer/ocular": "~1.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Disque\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mariano Iglesias",
+                    "email": "mgiglesias@gmail.com",
+                    "homepage": "http://marianoiglesias.com.ar"
+                }
+            ],
+            "description": "PHP library for Disque, an in-memory, distributed job queue",
+            "homepage": "https://github.com/mariano/disque-php",
+            "keywords": [
+                "disque",
+                "job",
+                "queue"
+            ],
+            "time": "2017-02-16T22:49:19+00:00"
+        },
+        {
+            "name": "psr/container",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/container.git",
+                "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/container/zipball/b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
+                "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Container\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common Container Interface (PHP FIG PSR-11)",
+            "homepage": "https://github.com/php-fig/container",
+            "keywords": [
+                "PSR-11",
+                "container",
+                "container-interface",
+                "container-interop",
+                "psr"
+            ],
+            "time": "2017-02-14 16:28:37"
+        },
+        {
+            "name": "psr/log",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/log.git",
+                "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
+                "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Log\\": "Psr/Log/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for logging libraries",
+            "homepage": "https://github.com/php-fig/log",
+            "keywords": [
+                "log",
+                "psr",
+                "psr-3"
+            ],
+            "time": "2016-10-10 12:19:37"
+        },
+        {
+            "name": "vanilla/garden-cli",
+            "version": "v1.6.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vanilla/garden-cli.git",
+                "reference": "9b56c831f691ddb2aa368c012cfec01bd76333b2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vanilla/garden-cli/zipball/9b56c831f691ddb2aa368c012cfec01bd76333b2",
+                "reference": "9b56c831f691ddb2aa368c012cfec01bd76333b2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Garden\\Cli\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Todd Burry",
+                    "email": "todd@vanillaforums.com"
+                }
+            ],
+            "description": "A full-featured, yet ridiculously simple commandline parser for your next php cli script. Stop fighting with getopt().",
+            "time": "2017-02-09T19:54:53+00:00"
+        },
+        {
+            "name": "vanilla/garden-container",
+            "version": "v2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vanilla/garden-container.git",
+                "reference": "df19515548ed619320a3214f15848f98a5592d15"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vanilla/garden-container/zipball/df19515548ed619320a3214f15848f98a5592d15",
+                "reference": "df19515548ed619320a3214f15848f98a5592d15",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0",
+                "psr/container": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Garden\\Container\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Todd Burry",
+                    "email": "todd@vanillaforums.com"
+                }
+            ],
+            "description": "A dependency injection container.",
+            "time": "2017-05-05T17:50:58+00:00"
+        },
+        {
+            "name": "vanilla/garden-daemon",
+            "version": "v0.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vanilla/garden-daemon.git",
+                "reference": "4d62fa7d78c306787e616cdf5e40df00286516a7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vanilla/garden-daemon/zipball/4d62fa7d78c306787e616cdf5e40df00286516a7",
+                "reference": "4d62fa7d78c306787e616cdf5e40df00286516a7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6",
+                "psr/log": "~1.0",
+                "vanilla/garden-cli": "^1.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Garden\\Daemon\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tim Gunter",
+                    "email": "tim@vanillaforums.com"
+                }
+            ],
+            "description": "A multi purpose forking daemon subsystem for long running PHP applications.",
+            "time": "2017-03-24T15:52:19+00:00"
+        },
+        {
+            "name": "vanilla/garden-http",
+            "version": "v1.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vanilla/garden-http.git",
+                "reference": "4eeb8b7e0f54f2403308b0c43804b611a6fd4e2a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vanilla/garden-http/zipball/4eeb8b7e0f54f2403308b0c43804b611a6fd4e2a",
+                "reference": "4eeb8b7e0f54f2403308b0c43804b611a6fd4e2a",
+                "shasum": ""
+            },
+            "require": {
+                "lib-curl": "*",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "vanilla/garden": "dev-master"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Garden\\Http\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Todd Burry",
+                    "email": "todd@vanillaforums.com"
+                }
+            ],
+            "description": "An unbloated HTTP client library for building RESTful API clients.",
+            "time": "2017-06-20T21:44:22+00:00"
+        },
+        {
+            "name": "vanilla/queue-interop",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:vanilla/queue-interop.git",
+                "reference": "9ebf2d907f478e2ca55333506cbd9df36ed9abda"
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Garden\\QueueInterop\\": "src"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tim Gunter",
+                    "email": "tim@vanillaforums.com"
+                }
+            ],
+            "description": "Queue interop.",
+            "time": "2017-01-23 20:57:46"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "vanilla/queue-interop": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=7.0"
+    },
+    "platform-dev": []
+}

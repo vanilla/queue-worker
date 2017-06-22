@@ -27,7 +27,7 @@
     ],
     "require": {
         "php": ">=7.0",
-        "kaecyra/app-common": "^0.9",
+        "kaecyra/app-common": "^1.0",
         "vanilla/garden-container": "^2.0",
         "vanilla/garden-daemon": "^0.9",
         "vanilla/garden-cli": "^1.6",
