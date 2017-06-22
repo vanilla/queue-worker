@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "2e88fe292a230d7e33fb1aadcb15297e",
+    "content-hash": "7b1b316f8a79af97a53e5449244e8881",
     "packages": [
         {
             "name": "kaecyra/app-common",
-            "version": "v1.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kaecyra/app-common.git",
-                "reference": "f94615dc904e5725ae2cefebcb83f5776d55ed90"
+                "reference": "290f98196fe3d365d6a2b935aecb8c480d558e9e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kaecyra/app-common/zipball/f94615dc904e5725ae2cefebcb83f5776d55ed90",
-                "reference": "f94615dc904e5725ae2cefebcb83f5776d55ed90",
+                "url": "https://api.github.com/repos/kaecyra/app-common/zipball/290f98196fe3d365d6a2b935aecb8c480d558e9e",
+                "reference": "290f98196fe3d365d6a2b935aecb8c480d558e9e",
                 "shasum": ""
             },
             "require": {
@@ -50,7 +50,7 @@
             "keywords": [
                 "app-common"
             ],
-            "time": "2017-06-22T20:15:04+00:00"
+            "time": "2017-06-22T20:21:58+00:00"
         },
         {
             "name": "mariano/disque-php",
@@ -271,20 +271,21 @@
         },
         {
             "name": "vanilla/garden-daemon",
-            "version": "v0.9",
+            "version": "v1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vanilla/garden-daemon.git",
-                "reference": "4d62fa7d78c306787e616cdf5e40df00286516a7"
+                "reference": "faec4630fdac536707b6d28e6bacb1ebb107edeb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vanilla/garden-daemon/zipball/4d62fa7d78c306787e616cdf5e40df00286516a7",
-                "reference": "4d62fa7d78c306787e616cdf5e40df00286516a7",
+                "url": "https://api.github.com/repos/vanilla/garden-daemon/zipball/faec4630fdac536707b6d28e6bacb1ebb107edeb",
+                "reference": "faec4630fdac536707b6d28e6bacb1ebb107edeb",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.6",
+                "psr/container": "^1.0",
                 "psr/log": "~1.0",
                 "vanilla/garden-cli": "^1.6"
             },
@@ -305,7 +306,7 @@
                 }
             ],
             "description": "A multi purpose forking daemon subsystem for long running PHP applications.",
-            "time": "2017-03-24T15:52:19+00:00"
+            "time": "2017-06-22T20:31:09+00:00"
         },
         {
             "name": "vanilla/garden-http",
