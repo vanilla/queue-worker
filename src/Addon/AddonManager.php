@@ -17,7 +17,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LogLevel;
 
-use Garden\Container\Container;
+use Psr\Container\ContainerInterface;
 use Garden\Container\Reference;
 
 /**
@@ -35,7 +35,7 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
 
     /**
      * Dependency Injection Container
-     * @var Container
+     * @var ContainerInterface
      */
     protected $di;
 
@@ -69,7 +69,7 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      */
     protected $autoload;
 
-    public function __construct(Container $di, array $scanDirs) {
+    public function __construct(ContainerInterface $di, array $scanDirs) {
         $this->di = $di;
         $this->sources = [];
         $this->addons = [];

@@ -16,14 +16,6 @@
     "repositories": [
         {
             "type": "git",
-            "url": "git@github.com:vanilla/garden-daemon.git"
-        },
-        {
-            "type": "git",
-            "url": "git@github.com:kaecyra/app-common.git"
-        },
-        {
-            "type": "git",
             "url": "git@github.com:vanilla/queue-interop.git"
         }
     ],
@@ -35,10 +27,9 @@
     ],
     "require": {
         "php": ">=7.0",
-        "kaecyra/app-common": "dev-master",
-        "container-interop/container-interop": "^1.1",
-        "vanilla/garden-container": "^1.4",
-        "vanilla/garden-daemon": "dev-master",
+        "kaecyra/app-common": "^1.0",
+        "vanilla/garden-container": "^2.0",
+        "vanilla/garden-daemon": "^0.9",
         "vanilla/garden-cli": "^1.6",
         "vanilla/garden-http": "^1.1",
         "vanilla/queue-interop": "dev-master",

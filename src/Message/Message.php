@@ -60,7 +60,7 @@ class Message {
         $this->body = $body;
         $this->extras = $extras;
 
-        $this->queue = $this->headers['queue'] ?? null;
+        $this->queue = $this->headers['queue'] ?? '';
     }
 
     /**
@@ -88,6 +88,15 @@ class Message {
      */
     public function getBody(): array {
         return $this->body;
+    }
+
+    /**
+     * Get queue name
+     *
+     * @return string
+     */
+    public function getQueue(): string {
+        return $this->queue;
     }
 
     /**

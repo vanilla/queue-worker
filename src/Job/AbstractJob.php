@@ -9,8 +9,6 @@ namespace Vanilla\QueueWorker\Job;
 
 use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 
-use Garden\Container\Container;
-
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
 
@@ -51,7 +49,6 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     /**
      * Prepare job
      *
-     * @param Container $di
      */
     public function __construct() {
         $this->setStatus(JobStatus::RECEIVED);

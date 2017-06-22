@@ -16,7 +16,7 @@ use Vanilla\QueueWorker\Exception\UnknownJobException;
 use Vanilla\QueueWorker\Exception\BrokenMessageException;
 use Vanilla\QueueWorker\Exception\BrokenJobException;
 
-use Garden\Container\Container;
+use Psr\Container\ContainerInterface;
 
 use Psr\Log\LogLevel;
 
@@ -187,7 +187,7 @@ class ProductWorker extends AbstractQueueWorker {
 
                 // Clone DI to prevent pollution
                 $workerContainer = clone $this->di;
-                $workerContainer->setInstance(Container::class, $workerContainer);
+                $workerContainer->setInstance(ContainerInterface::class, $workerContainer);
 
                 // Remember this DI in the main DI
                 $this->di->setInstance('@WorkerContainer', $workerContainer);
@@ -298,7 +298,7 @@ class ProductWorker extends AbstractQueueWorker {
         // Got a message, so decrement iterations
         $this->iterations--;
 
-        $this->log(LogLevel::DEBUG, "[{slot}] Got message from queue", [
+        $this->log(LogLevel::DEBUG, "[{slot}] Got message from queue: {queue}", [
             'slot'  => $this->getSlot()
         ]);
         $this->log(LogLevel::DEBUG, print_r($rawMessage, true));
@@ -328,10 +328,10 @@ class ProductWorker extends AbstractQueueWorker {
         // Convert message to runnable job
         $job = $this->getJob($message, $this->di->get('@WorkerContainer'));
 
-        $this->log(LogLevel::NOTICE, "[{slot}] Resolved job: {job} ({id})", [
+        $this->log(LogLevel::NOTICE, "[{slot}][{queue}] Resolved job: {job}", [
             'slot'  => $this->getSlot(),
-            'job'   => $job->getName(),
-            'id'    => $message->getID()
+            'queue' => $message->getQueue(),
+            'job'   => $job->getName()
         ]);
 
         $this->fire('gotJob', [$job]);
@@ -380,7 +380,7 @@ class ProductWorker extends AbstractQueueWorker {
      * @param Message $message
      * @return AbstractJob
      */
-    public function getJob(Message $message, Container $workerDI): AbstractJob {
+    public function getJob(Message $message, ContainerInterface $workerDI): AbstractJob {
         $payloadType = $message->getPayloadType();
 
         // Check that the specified job exists

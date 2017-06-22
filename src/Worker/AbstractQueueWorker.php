@@ -11,12 +11,11 @@ use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 use Vanilla\QueueWorker\Message\Parser\ParserInterface;
 use Vanilla\QueueWorker\Job\JobInterface;
 
-use Garden\Container\Container;
-
 use Kaecyra\AppCommon\AbstractConfig;
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
 
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LogLevel;
@@ -38,7 +37,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
 
     /**
      * Dependency Injection Container
-     * @var \Garden\Container\Container
+     * @var \Psr\Container\ContainerInterface;
      */
     protected $di;
 
@@ -83,7 +82,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
      *
      * @param Container $di
      */
-    public function __construct(Container $di, AbstractConfig $config) {
+    public function __construct(ContainerInterface $di, AbstractConfig $config) {
         $this->di = $di;
         $this->config = $config;
         $this->queues = null;
