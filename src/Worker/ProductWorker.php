@@ -288,7 +288,7 @@ class ProductWorker extends AbstractQueueWorker {
         // Got a message, so decrement iterations
         $this->iterations--;
 
-        $this->log(LogLevel::DEBUG, "[{slot}] Got message from queue", [
+        $this->log(LogLevel::DEBUG, "[{slot}] Got message from queue: {queue}", [
             'slot'  => $this->getSlot()
         ]);
         $this->log(LogLevel::DEBUG, print_r($rawMessage, true));
@@ -322,8 +322,9 @@ class ProductWorker extends AbstractQueueWorker {
         // Convert message to runnable job
         $job = $this->getJob($message, $workerDI);
 
-        $this->log(LogLevel::NOTICE, "[{slot}] Resolved job: {job}", [
+        $this->log(LogLevel::NOTICE, "[{slot}][{queue}] Resolved job: {job}", [
             'slot'  => $this->getSlot(),
+            'queue' => $message->getQueue(),
             'job'   => $job->getName()
         ]);
 
