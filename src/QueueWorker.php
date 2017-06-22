@@ -28,6 +28,7 @@ use Kaecyra\AppCommon\ConfigCollection;
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
 
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -52,7 +53,7 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
 
     /**
      * Dependency Injection Container
-     * @var \Garden\Container\Container
+     * @var ContainerInterface
      */
     protected $di;
 
@@ -140,7 +141,11 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
 
         $di = new Container;
         $di
-            ->setInstance(Container::class, $di)
+            ->rule(ContainerInterface::class)
+            ->addAlias(Container::class)
+            ->setClass(Container::class)
+
+            ->setInstance(ContainerInterface::class, $container)
 
             ->defaultRule()
             ->setShared(true)
@@ -195,14 +200,14 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
     /**
      * Construct app
      *
-     * @param Container $di
+     * @param ContainerInterface $di
      * @param Cli $cli
      * @param AbstractConfig $config
      * @param AddonManager $addons
      * @param ErrorHandler $errorHandler
      */
     public function __construct(
-        Container $di,
+        ContainerInterface $di,
         Cli $cli,
         AbstractConfig $config,
         AddonManager $addons,

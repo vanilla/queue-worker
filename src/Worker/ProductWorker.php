@@ -16,7 +16,7 @@ use Vanilla\QueueWorker\Exception\UnknownJobException;
 use Vanilla\QueueWorker\Exception\BrokenMessageException;
 use Vanilla\QueueWorker\Exception\BrokenJobException;
 
-use Garden\Container\Container;
+use Psr\Container\ContainerInterface;
 
 use Psr\Log\LogLevel;
 
@@ -185,6 +185,13 @@ class ProductWorker extends AbstractQueueWorker {
 
             try {
 
+                // Clone DI to prevent pollution
+                $workerContainer = clone $this->di;
+                $workerContainer->setInstance(ContainerInterface::class, $workerContainer);
+
+                // Remember this DI in the main DI
+                $this->di->setInstance('@WorkerContainer', $workerContainer);
+
                 // Retrieve and parse message
 
                 $message = $this->parseMessage($rawMessage);
@@ -223,8 +230,7 @@ class ProductWorker extends AbstractQueueWorker {
 
                 // Message could not be processed within the allotted retry count
 
-                $this->log(LogLevel::WARNING, "Broken message [{job}]: {reason}", [
-                    'job'       => $ex->getJob(),
+                $this->log(LogLevel::WARNING, "Broken message: {reason}", [
                     'reason'    => $ex->getMessage()
                 ]);
                 $jobStatus = JobStatus::ABANDONED;
@@ -239,6 +245,10 @@ class ProductWorker extends AbstractQueueWorker {
                 $reason = $ex->getMessage();
 
             } finally {
+
+                // Destroy child DI
+                $this->di->setInstance('@WorkerContainer', null);
+
                 $message = $message ?? null;
                 $job = $job ?? null;
                 $jobStatus = $jobStatus ?? JobStatus::ERROR;
@@ -313,14 +323,10 @@ class ProductWorker extends AbstractQueueWorker {
         // Check message integrity
         $this->validateMessage($message);
 
-        // Clone DI to prevent pollution
-        $workerDI = clone $this->di;
-        $workerDI->setInstance(ContainerInterface::class, $workerDI);
-
-        $this->fire('prepareJobEnvironment', [$message, $workerDI]);
+        $this->fire('prepareJobEnvironment', [$message, $this->di->get('@WorkerContainer')]);
 
         // Convert message to runnable job
-        $job = $this->getJob($message, $workerDI);
+        $job = $this->getJob($message, $this->di->get('@WorkerContainer'));
 
         $this->log(LogLevel::NOTICE, "[{slot}][{queue}] Resolved job: {job}", [
             'slot'  => $this->getSlot(),
@@ -351,9 +357,13 @@ class ProductWorker extends AbstractQueueWorker {
      * @throws BrokenMessageException
      */
     public function validateMessage(Message $message) {
-        //$nacks = $message->getExtra('nacks');
+        $nacks = $message->getExtra('nacks');
         $deliveries = $message->getExtra('additional-deliveries');
-        if ($deliveries > $this->retries) {
+        $this->log(LogLevel::DEBUG, " message nacked {nacks} times, delivered {deliveries} additional times", [
+            'deliveries' => $deliveries,
+            'nacks' => $nacks
+        ]);
+        if (($deliveries + $nacks) > $this->retries) {
             throw new BrokenMessageException($message, "too many retries");
         }
     }
@@ -364,7 +374,7 @@ class ProductWorker extends AbstractQueueWorker {
      * @param Message $message
      * @return AbstractJob
      */
-    public function getJob(Message $message, Container $workerDI): AbstractJob {
+    public function getJob(Message $message, ContainerInterface $workerDI): AbstractJob {
         $payloadType = $message->getPayloadType();
 
         // Check that the specified job exists
@@ -379,6 +389,7 @@ class ProductWorker extends AbstractQueueWorker {
 
         // Create job instance
         $job = $workerDI->get($payloadType);
+        $job->setID($message->getID());
         $job->setData($message->getBody());
         return $job;
     }

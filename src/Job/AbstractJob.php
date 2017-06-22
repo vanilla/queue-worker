@@ -9,8 +9,6 @@ namespace Vanilla\QueueWorker\Job;
 
 use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 
-use Garden\Container\Container;
-
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
 
@@ -31,10 +29,10 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     use EventAwareTrait;
 
     /**
-     * Dependency Injection Container
-     * @var Container
+     * Job message ID
+     * @var string
      */
-    protected $di;
+    protected $id;
 
     /**
      * Job execution status
@@ -43,14 +41,35 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     protected $status;
 
     /**
+     * Job data
+     * @var array
+     */
+    protected $data;
+
+    /**
      * Prepare job
      *
-     * @param Container $di
      */
-    public function __construct(Container $di) {
-        $this->di = $di;
-
+    public function __construct() {
         $this->setStatus(JobStatus::RECEIVED);
+    }
+
+    /**
+     * Set job id
+     *
+     * @param string $id
+     */
+    public function setID(string $id) {
+        $this->id = $id;
+    }
+
+    /**
+     * Get job ID
+     *
+     * @return string
+     */
+    public function getID(): string {
+        return $this->id;
     }
 
     /**

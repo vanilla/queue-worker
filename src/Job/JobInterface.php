@@ -7,8 +7,6 @@
 
 namespace Vanilla\QueueWorker\Job;
 
-use Garden\Container\Container;
-
 /**
  * Queue job interface.
  *
