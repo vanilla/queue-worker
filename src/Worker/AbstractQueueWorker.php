@@ -9,6 +9,7 @@ namespace Vanilla\QueueWorker\Worker;
 
 use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 use Vanilla\QueueWorker\Message\Parser\ParserInterface;
+use Vanilla\QueueWorker\Job\JobInterface;
 
 use Kaecyra\AppCommon\AbstractConfig;
 use Kaecyra\AppCommon\Event\EventAwareInterface;
@@ -197,6 +198,11 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
         $this->log(LogLevel::INFO, " using parser {class}",[
             'class' => get_class($this->parser)
         ]);
+
+        // Don't share jobs
+
+        $this->di->rule(AbstractJob::class)
+            ->setShared(false);
     }
 
     /**

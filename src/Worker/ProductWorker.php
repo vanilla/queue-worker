@@ -245,17 +245,17 @@ class ProductWorker extends AbstractQueueWorker {
                 $reason = $ex->getMessage();
 
             } finally {
-
-                // Destroy child DI
-                $this->di->setInstance('@WorkerContainer', null);
-
                 $message = $message ?? null;
                 $job = $job ?? null;
                 $jobStatus = $jobStatus ?? JobStatus::ERROR;
                 $reason = $reason ?? null;
             }
 
-            $this->fire('endJob', [$message, $job, $jobStatus]);
+            $this->fire('endJob', [$message, $job, $jobStatus, $this->di->get('@WorkerContainer')]);
+
+            // Destroy child DI
+            $this->di->get('@WorkerContainer')->setInstance(Container::class, null);
+            $this->di->setInstance('@WorkerContainer', null);
 
             // Handle end state for jobs
 
@@ -346,6 +346,12 @@ class ProductWorker extends AbstractQueueWorker {
         $job->teardown();
 
         $this->fire('finishedJob', [$job]);
+
+        $this->log(LogLevel::NOTICE, "[{slot}] Completed job: {job} ({id})", [
+            'slot'  => $this->getSlot(),
+            'job'   => $job->getName(),
+            'id'    => $message->getID()
+        ]);
 
         return $job;
     }
