@@ -131,7 +131,7 @@ class ProductWorker extends AbstractQueueWorker {
         // Connect to queues and cache
         $this->prepareWorker();
 
-        $this->fire('workerReady', [$this, $this->di]);
+        $this->fire('workerReady', [$this, $this->container]);
     }
 
     /**
@@ -186,11 +186,11 @@ class ProductWorker extends AbstractQueueWorker {
             try {
 
                 // Clone DI to prevent pollution
-                $workerContainer = clone $this->di;
+                $workerContainer = clone $this->container;
                 $workerContainer->setInstance(ContainerInterface::class, $workerContainer);
 
                 // Remember this DI in the main DI
-                $this->di->setInstance('@WorkerContainer', $workerContainer);
+                $this->container->setInstance('@WorkerContainer', $workerContainer);
 
                 // Retrieve and parse message
 
@@ -251,11 +251,11 @@ class ProductWorker extends AbstractQueueWorker {
                 $reason = $reason ?? null;
             }
 
-            $this->fire('endJob', [$message, $job, $jobStatus, $this->di->get('@WorkerContainer')]);
+            $this->fire('endJob', [$message, $job, $jobStatus, $this->container->get('@WorkerContainer')]);
 
             // Destroy child DI
-            $this->di->get('@WorkerContainer')->setInstance(Container::class, null);
-            $this->di->setInstance('@WorkerContainer', null);
+            $this->container->get('@WorkerContainer')->setInstance(Container::class, null);
+            $this->container->setInstance('@WorkerContainer', null);
 
             // Handle end state for jobs
 
@@ -323,10 +323,10 @@ class ProductWorker extends AbstractQueueWorker {
         // Check message integrity
         $this->validateMessage($message);
 
-        $this->fire('prepareJobEnvironment', [$message, $this->di->get('@WorkerContainer')]);
+        $this->fire('prepareJobEnvironment', [$message, $this->container->get('@WorkerContainer')]);
 
         // Convert message to runnable job
-        $job = $this->getJob($message, $this->di->get('@WorkerContainer'));
+        $job = $this->getJob($message, $this->container->get('@WorkerContainer'));
 
         $this->log(LogLevel::NOTICE, "[{slot}][{queue}] Resolved job: {job}", [
             'slot'  => $this->getSlot(),
