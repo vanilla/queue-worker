@@ -29,7 +29,7 @@
         "php": ">=7.0",
         "kaecyra/app-common": "^1.0",
         "vanilla/garden-container": "^2.0",
-        "vanilla/garden-daemon": "^1.0",
+        "vanilla/garden-daemon": "^1.1",
         "vanilla/garden-cli": "^1.6",
         "vanilla/garden-http": "^1.1",
         "vanilla/queue-interop": "dev-master",

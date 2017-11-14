@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "7b1b316f8a79af97a53e5449244e8881",
+    "content-hash": "f88cf43b04f710ab1b0c53bc7c8f7609",
     "packages": [
         {
             "name": "kaecyra/app-common",
@@ -106,12 +106,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/container.git",
-                "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f"
+                "reference": "2cc4a01788191489dc7459446ba832fa79a216a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/container/zipball/b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
-                "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
+                "url": "https://api.github.com/repos/php-fig/container/zipball/2cc4a01788191489dc7459446ba832fa79a216a7",
+                "reference": "2cc4a01788191489dc7459446ba832fa79a216a7",
                 "shasum": ""
             },
             "require": {
@@ -147,7 +147,7 @@
                 "container-interop",
                 "psr"
             ],
-            "time": "2017-02-14 16:28:37"
+            "time": "2017-06-28T15:35:32+00:00"
         },
         {
             "name": "psr/log",
@@ -194,7 +194,7 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2016-10-10 12:19:37"
+            "time": "2016-10-10T12:19:37+00:00"
         },
         {
             "name": "vanilla/garden-cli",
@@ -271,16 +271,16 @@
         },
         {
             "name": "vanilla/garden-daemon",
-            "version": "v1.0",
+            "version": "1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vanilla/garden-daemon.git",
-                "reference": "faec4630fdac536707b6d28e6bacb1ebb107edeb"
+                "reference": "8396be405978314faa5530ffd420e881a7b33ace"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vanilla/garden-daemon/zipball/faec4630fdac536707b6d28e6bacb1ebb107edeb",
-                "reference": "faec4630fdac536707b6d28e6bacb1ebb107edeb",
+                "url": "https://api.github.com/repos/vanilla/garden-daemon/zipball/8396be405978314faa5530ffd420e881a7b33ace",
+                "reference": "8396be405978314faa5530ffd420e881a7b33ace",
                 "shasum": ""
             },
             "require": {
@@ -306,7 +306,7 @@
                 }
             ],
             "description": "A multi purpose forking daemon subsystem for long running PHP applications.",
-            "time": "2017-06-22T20:31:09+00:00"
+            "time": "2017-11-14T21:33:33+00:00"
         },
         {
             "name": "vanilla/garden-http",
@@ -375,7 +375,7 @@
                 }
             ],
             "description": "Queue interop.",
-            "time": "2017-01-23 20:57:46"
+            "time": "2017-01-23T20:57:46+00:00"
         }
     ],
     "packages-dev": [],
