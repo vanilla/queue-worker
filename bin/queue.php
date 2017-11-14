@@ -2,11 +2,10 @@
 <?php
 
 /**
- * ProductQueue is the asynchronous task running daemon for Vanilla's Hosted
- * environment.
+ * Queue-Worker is an asynchronous task running daemon.
  *
- * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @license MIT
+ * @copyright 2009-2017 Vanilla Forums Inc.
  * @author Tim Gunter <tim@vanillaforums.com>
  * @package queue-worker
  * @version 1.0
@@ -34,7 +33,7 @@ foreach ($paths as $path) {
 }
 
 // Run bootstrap
-QueueWorker::bootstrap();
+QueueWorker::bootstrap($queueArgs ?? []);
 
 $exitCode = 0;
 try {
