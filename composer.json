@@ -23,7 +23,8 @@
         "bin-dir": "./"
     },
     "bin": [
-        "bin/queue.php"
+        "bin/queue.php",
+        "bin/queue-run.php"
     ],
     "require": {
         "php": ">=7.0",
