@@ -9,14 +9,14 @@ chdir(dirname($argv[0]));
 // Include the core autoloader.
 
 $paths = [
-__DIR__.'/../vendor/autoload.php',  // locally
-__DIR__.'/../../../autoload.php'    // dependency
+    __DIR__.'/../vendor/autoload.php',  // locally
+    __DIR__.'/../../../autoload.php'    // dependency
 ];
 foreach ($paths as $path) {
-if (file_exists($path)) {
-require_once $path;
-break;
-}
+    if (file_exists($path)) {
+        require_once $path;
+        break;
+    }
 }
 
 // Run bootstrap
@@ -25,32 +25,31 @@ QueueWorker::bootstrap($queueArgs ?? []);
 $exitCode = 0;
 try {
 
-$daemon = $container->get(Daemon::class);
-$exitCode = $daemon->attach($argv);
+    $daemon = $container->get(Daemon::class);
+    $exitCode = $daemon->attach($argv);
 
 } catch (\Garden\Daemon\Exception $ex) {
 
-$exceptionCode = $ex->getCode();
-if ($exceptionCode != 200) {
+    $exceptionCode = $ex->getCode();
+    if ($exceptionCode != 200) {
 
-if ($ex->getFile()) {
-$line = $ex->getLine();
-$file = $ex->getFile();
-$logger->log(LogLevel::ERROR, "Error on line {$line} of {$file}:");
-}
-$logger->log(LogLevel::ERROR, $ex->getMessage());
-}
+        if ($ex->getFile()) {
+            $line = $ex->getLine();
+            $file = $ex->getFile();
+            $logger->log(LogLevel::ERROR, "Error on line {$line} of {$file}:");
+        }
+        $logger->log(LogLevel::ERROR, $ex->getMessage());
+    }
 
-}
-catch (\Exception $ex) {
-$exitCode = 1;
+} catch (\Exception $ex) {
+    $exitCode = 1;
 
-if ($ex->getFile()) {
-$line = $ex->getLine();
-$file = $ex->getFile();
-$logger->log(LogLevel::ERROR, "Error on line {$line} of {$file}:");
-}
-$logger->log(LogLevel::ERROR, $ex->getMessage());
+    if ($ex->getFile()) {
+        $line = $ex->getLine();
+        $file = $ex->getFile();
+        $logger->log(LogLevel::ERROR, "Error on line {$line} of {$file}:");
+    }
+    $logger->log(LogLevel::ERROR, $ex->getMessage());
 }
 
 exit($exitCode);
