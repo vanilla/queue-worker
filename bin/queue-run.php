@@ -1,5 +1,6 @@
 <?php
 
+use \Vanilla\QueueWorker\QueueWorker;
 use \Garden\Daemon\Daemon;
 use \Psr\Log\LogLevel;
 
