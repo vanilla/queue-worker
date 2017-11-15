@@ -124,11 +124,6 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
             die(APP." requires PHP 7.0 or greater.");
         }
 
-        if (posix_getuid() != 0) {
-            echo "Must be root.\n";
-            exit;
-        }
-
         // Report and track all errors
 
         error_reporting(E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR);
