@@ -102,7 +102,7 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      * @package queue-worker
      * @version 0.1.0
      */
-    public static function bootstrap(array $queueArgs = []) {
+    public static function bootstrap() {
         global $container, $logger;
 
         // Reflect on ourselves for the version
@@ -162,7 +162,7 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
 
             ->rule(Daemon::class)
             ->setConstructorArgs([
-                array_replace([
+                [
                     'appversion'        => APP_VERSION,
                     'appdir'            => PATH_ROOT,
                     'appdescription'    => 'Asynchronous Queue Worker',
@@ -170,7 +170,7 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
                     'appname'           => 'QueueWorker',
                     'authorname'        => 'Tim Gunter',
                     'authoremail'       => 'tim@vanillaforums.com'
-                ], $queueArgs),
+                ],
                 new Reference([AbstractConfig::class, 'daemon'])
             ])
             ->addCall('configure', [new Reference([AbstractConfig::class, "daemon"])]);
