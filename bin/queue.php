@@ -11,10 +11,9 @@
  * @version 1.0
  */
 
-namespace Vanilla\QueueWorker;
-
-use \Garden\Daemon\Daemon;
-use \Psr\Log\LogLevel;
+use Garden\Daemon\Daemon;
+use Psr\Log\LogLevel;
+use Vanilla\QueueWorker\QueueWorker;
 
 // Switch to queue root
 chdir(dirname($argv[0]));
@@ -22,6 +21,7 @@ chdir(dirname($argv[0]));
 // Include the core autoloader.
 
 $paths = [
+    __DIR__.'/vendor/autoload.php',     // symlinked bin
     __DIR__.'/../vendor/autoload.php',  // locally
     __DIR__.'/../../../autoload.php'    // dependency
 ];
@@ -54,7 +54,7 @@ try {
         $logger->log(LogLevel::ERROR, $ex->getMessage());
     }
 
-} catch (\Exception $ex) {
+} catch (Exception $ex) {
     $exitCode = 1;
 
     if ($ex->getFile()) {
