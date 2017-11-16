@@ -33,7 +33,7 @@ foreach ($paths as $path) {
 }
 
 // Run bootstrap
-QueueWorker::bootstrap($queueArgs ?? []);
+QueueWorker::bootstrap(__DIR__);
 
 $exitCode = 0;
 try {

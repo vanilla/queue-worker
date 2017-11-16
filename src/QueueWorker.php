@@ -102,7 +102,7 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      * @package queue-worker
      * @version 0.1.0
      */
-    public static function bootstrap() {
+    public static function bootstrap($dir) {
         global $container, $logger;
 
         // Reflect on ourselves for the version
@@ -115,7 +115,7 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
         define('APP_VERSION', $version);
 
         define('APP', 'queue-worker');
-        define('PATH_ROOT', getcwd());
+        define('PATH_ROOT', $dir);
         date_default_timezone_set('UTC');
 
         // Check environment
