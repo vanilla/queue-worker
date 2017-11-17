@@ -208,7 +208,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
             } catch (ConnectionException $e) {
                 if ($this->retries > self::MAX_RETRIES) {
                     $this->log(LogLevel::INFO, " failed to connect: {emsg}, giving up after {tries} attempts", [
-                        'emsg' => $node[0],
+                        'emsg' => $e->getMessage(),
                         'tries' => $this->retries
                     ]);
                     throw $e;
@@ -218,7 +218,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
                 $delay = pow(2, $this->retries) * self::BACKOFF_FACTOR_MS;
                 $delaySeconds = round($delay / 1000, 2);
                 $this->log(LogLevel::INFO, " failed to connect: {emsg}, backoff for {sec} seconds", [
-                    'emsg' => $node[0],
+                    'emsg' => $e->getMessage(),
                     'sec' => $delaySeconds
                 ]);
                 usleep($delay * 1000);
