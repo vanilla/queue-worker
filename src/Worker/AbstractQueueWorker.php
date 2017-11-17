@@ -38,7 +38,6 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
     const QUEUE_DISTRIBUTION_KEY = 'queue.worker.distribution';
 
     const BACKOFF_FACTOR_MS = 100;
-    const MAX_RETRIES = 15;
 
     /**
      * Dependency Injection Container
@@ -161,8 +160,10 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
      *
      * This method prepares a forked worker to begin handling messages from
      * the queue.
+     *
+     * @param int $tries number of retries to permit
      */
-    public function prepareWorker() {
+    public function prepareWorker($tries) {
 
         // Prepare cache driver
 
@@ -206,7 +207,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
             try {
                 $this->queue->connect();
             } catch (ConnectionException $e) {
-                if ($this->retries > self::MAX_RETRIES) {
+                if ($this->retries > $tries) {
                     $this->log(LogLevel::INFO, " failed to connect: {emsg}, giving up after {tries} attempts", [
                         'emsg' => $e->getMessage(),
                         'tries' => $this->retries

@@ -29,6 +29,8 @@ use Psr\Log\LogLevel;
  */
 class ProductWorker extends AbstractQueueWorker {
 
+    const MAX_RETRIES = 15;
+
     /**
      * Worker slot
      * @var int
@@ -129,7 +131,7 @@ class ProductWorker extends AbstractQueueWorker {
         ]);
 
         // Connect to queues and cache
-        $this->prepareWorker();
+        $this->prepareWorker(self::MAX_RETRIES);
 
         $this->fire('workerReady', [$this, $this->container]);
     }

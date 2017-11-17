@@ -36,7 +36,7 @@ class MaintenanceWorker extends AbstractQueueWorker {
         $this->log(LogLevel::NOTICE, "Maintenance Worker started");
 
         // Connect to queues and cache
-        $this->prepareWorker();
+        $this->prepareWorker(1);
 
         // Gather queue backlog information
         $queues = $this->getQueues('full');
