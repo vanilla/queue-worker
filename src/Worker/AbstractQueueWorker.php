@@ -20,6 +20,8 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LogLevel;
 
+use Disque\Connection\ConnectionException;
+
 /**
  * Abstract Worker base class
  *
@@ -34,6 +36,9 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
     use EventAwareTrait;
 
     const QUEUE_DISTRIBUTION_KEY = 'queue.worker.distribution';
+
+    const BACKOFF_FACTOR_MS = 100;
+    const MAX_RETRIES = 15;
 
     /**
      * Dependency Injection Container
@@ -76,6 +81,12 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
      * @var ParserInterface
      */
     protected $parser;
+
+    /**
+     * How many retries have occurred
+     * @var int
+     */
+    protected $retries = 0;
 
     /**
      * Construct app
@@ -188,8 +199,39 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
             $node = $this->container->getArgs(\Disque\Connection\Credentials::class, $node);
         }
         $this->queue = new \Disque\Client($queueNodes);
-        $this->queue->connect();
 
+        // Attempt to connect
+
+        while (1) {
+            try {
+                $this->queue->connect();
+            } catch (ConnectionException $e) {
+                if ($this->retries > self::MAX_RETRIES) {
+                    $this->log(LogLevel::INFO, " failed to connect: {emsg}, giving up after {tries} attempts", [
+                        'emsg' => $node[0],
+                        'tries' => $this->retries
+                    ]);
+                    throw $e;
+                }
+
+                // Exponential backoff
+                $delay = pow(2, $this->retries) * self::BACKOFF_FACTOR_MS;
+                $delaySeconds = round($delay / 1000, 2);
+                $this->log(LogLevel::INFO, " failed to connect: {emsg}, backoff for {sec} seconds", [
+                    'emsg' => $node[0],
+                    'sec' => $delaySeconds
+                ]);
+                usleep($delay * 1000);
+                continue;
+            }
+
+            // Connected
+            break;
+        }
+
+        // Connected
+
+        $this->retries = 0;
         $this->container->setInstance(\Disque\Client::class, $this->queue);
 
         // Prepare queue message parser
