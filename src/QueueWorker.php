@@ -158,7 +158,8 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
             ->addCall('setEventManager')
 
             ->rule(AddonManager::class)
-            ->setConstructorArgs([new Reference([AbstractConfig::class, 'addons.scan'])])
+            //->setConstructorArgs([new Reference([AbstractConfig::class, 'addons.scan'])])
+            ->setConstructorArgs([[]])
 
             ->rule(Daemon::class)
             ->setConstructorArgs([
@@ -212,6 +213,13 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
         $this->cli = $cli;
         $this->config = $config;
         $this->addons = $addons;
+
+        // Set up addon scan dirs
+        $addonScanDirs = $this->config->get('addons.scan');
+        foreach ($addonScanDirs as $addonScanDir) {
+            $addonScanDir = paths(PATH_ROOT, $addonScanDir);
+            $this->addons->addSource($addonScanDir);
+        }
 
         // Set worker allocation oversight strategy
         $strategyClass = $this->config->get('queue.oversight.strategy');
