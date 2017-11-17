@@ -36,6 +36,8 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
     use EventAwareTrait;
 
     const QUEUE_DISTRIBUTION_KEY = 'queue.worker.distribution';
+    const QUEUE_CONNECT_TIMEOUT = 5;
+    const QUEUE_RESPONSE_TIMEOUT = 5;
 
     const BACKOFF_FACTOR_MS = 100;
 
@@ -162,6 +164,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
      * the queue.
      *
      * @param int $tries number of retries to permit
+     * @throws ConnectionException
      */
     public function prepareWorker($tries) {
 
@@ -192,11 +195,20 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
             'nodes' => count($queueNodes)
         ]);
 
+        $nodeDefault = [
+            null,
+            null,
+            null,
+            self::QUEUE_CONNECT_TIMEOUT,
+            self::QUEUE_RESPONSE_TIMEOUT
+        ];
+
         foreach ($queueNodes as &$node) {
             $this->log(LogLevel::INFO, "  queue: {server}:{port}", [
                 'server'    => $node[0],
                 'port'      => $node[1]
             ]);
+            $node = array_merge($nodeDefault, $node);
             $node = $this->container->getArgs(\Disque\Connection\Credentials::class, $node);
         }
         $this->queue = new \Disque\Client($queueNodes);
