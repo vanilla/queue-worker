@@ -222,6 +222,8 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
                     'sec' => $delaySeconds
                 ]);
                 usleep($delay * 1000);
+
+                $this->retries++;
                 continue;
             }
 
