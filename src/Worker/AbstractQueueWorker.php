@@ -208,7 +208,7 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
                 'server'    => $node[0],
                 'port'      => $node[1]
             ]);
-            $node = array_merge($nodeDefault, $node);
+            $node = array_replace($nodeDefault, $node);
             $node = $this->container->getArgs(\Disque\Connection\Credentials::class, $node);
         }
         $this->queue = new \Disque\Client($queueNodes);
