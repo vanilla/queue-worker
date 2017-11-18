@@ -195,12 +195,17 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
             'nodes' => count($queueNodes)
         ]);
 
+        // Don't re-use credentials
+
+        $this->container->rule(\Disque\Connection\Credentials::class)
+            ->setShared(false);
+
         $nodeDefault = [
-            null,
-            null,
-            null,
-            self::QUEUE_CONNECT_TIMEOUT,
-            self::QUEUE_RESPONSE_TIMEOUT
+            'host' => null,
+            'port' => null,
+            'password' => null,
+            'connectionTimeout' => self::QUEUE_CONNECT_TIMEOUT,
+            'responseTimeout' => self::QUEUE_RESPONSE_TIMEOUT
         ];
 
         foreach ($queueNodes as &$node) {
@@ -208,7 +213,13 @@ abstract class AbstractQueueWorker implements LoggerAwareInterface, EventAwareIn
                 'server'    => $node[0],
                 'port'      => $node[1]
             ]);
-            $node = array_replace($nodeDefault, $node);
+            $node = array_replace($nodeDefault, [
+                'host' => $node[0],
+                'port' => $node[1],
+                'password' => $node[2] ?? null,
+                'connectionTimeout' => self::QUEUE_CONNECT_TIMEOUT,
+                'responseTimeout' => self::QUEUE_RESPONSE_TIMEOUT
+            ]);
             $node = $this->container->getArgs(\Disque\Connection\Credentials::class, $node);
         }
         $this->queue = new \Disque\Client($queueNodes);
