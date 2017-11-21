@@ -167,7 +167,7 @@ class ProductWorker extends AbstractQueueWorker {
     /**
      * Poll the queue for a message
      *
-     * @return bool
+     * @return bool whether we handled any messages
      */
     public function runIteration() {
 
