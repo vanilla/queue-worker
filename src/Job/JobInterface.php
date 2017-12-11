@@ -57,6 +57,12 @@ interface JobInterface {
     public function teardown();
 
     /**
+     * Return execution time
+     * @return float
+     */
+    public function getDuration();
+
+    /**
      * Run job payload
      */
     public function run();

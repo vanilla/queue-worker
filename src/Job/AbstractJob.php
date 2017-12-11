@@ -47,11 +47,24 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     protected $data;
 
     /**
+     * Job start time
+     * @var float
+     */
+    protected $startTime;
+
+    /**
+     * Job duration
+     * @var float
+     */
+    protected $duration;
+
+    /**
      * Prepare job
      *
      */
     public function __construct() {
         $this->setStatus(JobStatus::RECEIVED);
+        $this->startTime = microtime(true);
     }
 
     /**
@@ -131,6 +144,16 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      */
     public function teardown() {
         $this->setStatus(JobStatus::COMPLETE);
+        $this->duration = microtime(true) - $this->startTime;
+    }
+
+    /**
+     * Get execution time
+     *
+     * @return float
+     */
+    public function getDuration(): float {
+        return $this->duration ? $this->duration : microtime(true) - $this->startTime;
     }
 
 }
