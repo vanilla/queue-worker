@@ -66,6 +66,8 @@ class MaintenanceWorker extends AbstractQueueWorker {
             $this->log(LogLevel::INFO, sprintf("  slot %3d: %s", $slot, $queueNames));
         }
 
+        $this->fire('maintenance', [$queues, $workers, $strategy, $distribution]);
+
         $this->log(LogLevel::NOTICE, " maintenance complete");
 
     }
