@@ -210,7 +210,8 @@ class ProductWorker extends AbstractQueueWorker {
 
                 // Unable to load job matching payload type
 
-                $this->log(LogLevel::WARNING, "Unknown job [{job}]: {reason}", [
+                $this->log(LogLevel::WARNING, "Unknown job [{id}][{job}]: {reason}", [
+                    'id'        => $message->getID(),
                     'job'       => $ex->getJob(),
                     'reason'    => $ex->getMessage()
                 ]);
@@ -221,7 +222,8 @@ class ProductWorker extends AbstractQueueWorker {
 
                 // Payload type matches object that is not a valid job
 
-                $this->log(LogLevel::WARNING, "Broken job [{job}]: {reason}", [
+                $this->log(LogLevel::WARNING, "Broken job [{id}][{job}]: {reason}", [
+                    'id'        => $message->getID(),
                     'job'       => $ex->getJob(),
                     'reason'    => $ex->getMessage()
                 ]);
@@ -232,7 +234,8 @@ class ProductWorker extends AbstractQueueWorker {
 
                 // Message could not be processed within the allotted retry count
 
-                $this->log(LogLevel::WARNING, "Broken message: {reason}", [
+                $this->log(LogLevel::WARNING, "Broken message [{id}]: {reason}", [
+                    'id'        => $message->getID(),
                     'reason'    => $ex->getMessage()
                 ]);
                 $jobStatus = JobStatus::ABANDONED;
