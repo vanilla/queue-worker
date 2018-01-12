@@ -24,6 +24,14 @@ interface JobInterface {
     public function getData(): array;
 
     /**
+     * Get job data by key
+     * 
+     * @param string $key
+     * @return mixed
+     */
+    public function get(string $key);
+
+    /**
      * Set job data
      *
      * @param array $data
