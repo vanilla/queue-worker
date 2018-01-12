@@ -25,7 +25,7 @@ interface JobInterface {
 
     /**
      * Get job data by key
-     * 
+     *
      * @param string $key
      * @return mixed
      */
