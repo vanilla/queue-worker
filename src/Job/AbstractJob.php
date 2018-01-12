@@ -7,6 +7,7 @@
 
 namespace Vanilla\QueueWorker\Job;
 
+use Kaecyra\AppCommon\Store;
 use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 
 use Kaecyra\AppCommon\Event\EventAwareInterface;
@@ -42,7 +43,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
 
     /**
      * Job data
-     * @var array
+     * @var Store
      */
     protected $data;
 
@@ -65,6 +66,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     public function __construct() {
         $this->setStatus(JobStatus::RECEIVED);
         $this->startTime = microtime(true);
+        $this->data = new Store;
     }
 
     /**
@@ -118,7 +120,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      * @return array
      */
     public function getData(): array {
-        return $this->data;
+        return $this->data->dump();
     }
 
     /**
@@ -127,7 +129,18 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      * @param array $data
      */
     public function setData(array $data) {
-        $this->data = $data;
+        $this->data->prepare($data);
+    }
+
+    /**
+     * Get key from payload
+     *
+     * @param string $key
+     *
+     * @return mixed
+     */
+    public function get(string $key) {
+        return $this->data->get($key);
     }
 
     /**
