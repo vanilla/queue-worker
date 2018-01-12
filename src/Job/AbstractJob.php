@@ -8,7 +8,7 @@
 namespace Vanilla\QueueWorker\Job;
 
 use Kaecyra\AppCommon\Store;
-use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
+use Kaecyra\AppCommon\Log\LoggerBoilerTrait;
 
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
