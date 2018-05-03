@@ -2,7 +2,7 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Worker;
@@ -171,11 +171,8 @@ class ProductWorker extends AbstractQueueWorker {
      */
     public function runIteration() {
 
-        // Get job from slot queues
-        $messages = $this->queue->getJob($this->slotQueues, [
-            'nohang' => true,
-            'withcounters' => true
-        ]);
+        // Get job messages from slot queues
+        $messages = $this->getMessagesFromSlotQueues();
 
         // No message? Return false immediately so worker can rest
         if (empty($messages) || !is_array($messages)) {
@@ -450,6 +447,29 @@ class ProductWorker extends AbstractQueueWorker {
             'file'      => $ex->getFile(),
             'line'      => $ex->getLine()
         ]]);
+    }
+
+    /**
+     * Get messages from slot queues
+     *
+     * @return array
+     */
+    protected function getMessagesFromSlotQueues() {
+        // Treat the slot queues as array
+        $slotQueues = $this->slotQueues;
+        if (!is_array($slotQueues)) {
+            $slotQueues = explode(' ', $slotQueues);
+        }
+
+        // Prepare the getJob command with variadic queue parameters
+        $commandArgs = $slotQueues;
+        $commandArgs[] = [
+            'nohang' => true,
+            'withcounters' => true
+        ];
+
+        // Get job from slot queues
+        return call_user_func_array([$this->queue, 'getJob'], $commandArgs);
     }
 
 }
