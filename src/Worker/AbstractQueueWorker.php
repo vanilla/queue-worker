@@ -2,14 +2,13 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Worker;
 
 use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 use Vanilla\QueueWorker\Message\Parser\ParserInterface;
-use Vanilla\QueueWorker\Job\JobInterface;
 
 use Kaecyra\AppCommon\AbstractConfig;
 use Kaecyra\AppCommon\Event\EventAwareInterface;
