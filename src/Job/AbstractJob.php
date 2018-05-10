@@ -2,16 +2,17 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2018 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Job;
 
-use Kaecyra\AppCommon\Store;
-use Kaecyra\AppCommon\Log\LoggerBoilerTrait;
+use Garden\QueueInterop\Job\JobInterface;
 
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
+use Kaecyra\AppCommon\Log\LoggerBoilerTrait;
+use Kaecyra\AppCommon\Store;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -92,7 +93,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      * @return string
      */
-    public function getName() {
+    public function getName(): string {
         return static::class;
     }
 
@@ -136,10 +137,11 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      * Get key from payload
      *
      * @param string $key
+     * @param mixed $default
      *
      * @return mixed
      */
-    public function get(string $key) {
+    public function get(string $key, $default = null) {
         return $this->data->get($key);
     }
 
