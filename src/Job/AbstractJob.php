@@ -8,6 +8,7 @@
 namespace Vanilla\QueueWorker\Job;
 
 use Garden\QueueInterop\Job\JobInterface;
+use Garden\QueueInterop\Job\JobStatus;
 
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;

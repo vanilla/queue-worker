@@ -8,9 +8,9 @@
 namespace Vanilla\QueueWorker\Worker;
 
 use Garden\QueueInterop\Job\JobInterface;
+use Garden\QueueInterop\Job\JobStatus;
 
 use Vanilla\QueueWorker\Message\Message;
-use Vanilla\QueueWorker\Job\JobStatus;
 
 use Vanilla\QueueWorker\Exception\UnknownJobException;
 use Vanilla\QueueWorker\Exception\BrokenMessageException;
