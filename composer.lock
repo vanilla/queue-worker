@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "f88cf43b04f710ab1b0c53bc7c8f7609",
+    "content-hash": "6c00eddbcc9476c2d15d266c65bba5d0",
     "packages": [
         {
             "name": "kaecyra/app-common",
-            "version": "v1.0.1",
+            "version": "v1.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kaecyra/app-common.git",
-                "reference": "290f98196fe3d365d6a2b935aecb8c480d558e9e"
+                "reference": "2f141faba6b43916e10159cc967e0e74efb2afa7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kaecyra/app-common/zipball/290f98196fe3d365d6a2b935aecb8c480d558e9e",
-                "reference": "290f98196fe3d365d6a2b935aecb8c480d558e9e",
+                "url": "https://api.github.com/repos/kaecyra/app-common/zipball/2f141faba6b43916e10159cc967e0e74efb2afa7",
+                "reference": "2f141faba6b43916e10159cc967e0e74efb2afa7",
                 "shasum": ""
             },
             "require": {
@@ -50,7 +50,7 @@
             "keywords": [
                 "app-common"
             ],
-            "time": "2017-06-22T20:21:58+00:00"
+            "time": "2018-03-05T15:54:16+00:00"
         },
         {
             "name": "mariano/disque-php",
@@ -155,12 +155,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d"
+                "reference": "3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
-                "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda",
+                "reference": "3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda",
                 "shasum": ""
             },
             "require": {
@@ -194,24 +194,24 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2016-10-10T12:19:37+00:00"
+            "time": "2018-04-03T15:59:15+00:00"
         },
         {
             "name": "vanilla/garden-cli",
-            "version": "v1.6.2",
+            "version": "v1.6.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vanilla/garden-cli.git",
-                "reference": "9b56c831f691ddb2aa368c012cfec01bd76333b2"
+                "reference": "8d150135624e207750cf45be107c3b4ef820faf4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vanilla/garden-cli/zipball/9b56c831f691ddb2aa368c012cfec01bd76333b2",
-                "reference": "9b56c831f691ddb2aa368c012cfec01bd76333b2",
+                "url": "https://api.github.com/repos/vanilla/garden-cli/zipball/8d150135624e207750cf45be107c3b4ef820faf4",
+                "reference": "8d150135624e207750cf45be107c3b4ef820faf4",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.4.0"
+                "php": ">=5.6.0"
             },
             "type": "library",
             "autoload": {
@@ -230,7 +230,7 @@
                 }
             ],
             "description": "A full-featured, yet ridiculously simple commandline parser for your next php cli script. Stop fighting with getopt().",
-            "time": "2017-02-09T19:54:53+00:00"
+            "time": "2017-11-30T16:08:28+00:00"
         },
         {
             "name": "vanilla/garden-container",
@@ -271,20 +271,20 @@
         },
         {
             "name": "vanilla/garden-daemon",
-            "version": "1.1",
+            "version": "v1.1.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vanilla/garden-daemon.git",
-                "reference": "8396be405978314faa5530ffd420e881a7b33ace"
+                "reference": "808061248712df0ffa52f8241eb0f2f37ddee2d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vanilla/garden-daemon/zipball/8396be405978314faa5530ffd420e881a7b33ace",
-                "reference": "8396be405978314faa5530ffd420e881a7b33ace",
+                "url": "https://api.github.com/repos/vanilla/garden-daemon/zipball/808061248712df0ffa52f8241eb0f2f37ddee2d9",
+                "reference": "808061248712df0ffa52f8241eb0f2f37ddee2d9",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.6",
+                "php": ">=7.0",
                 "psr/container": "^1.0",
                 "psr/log": "~1.0",
                 "vanilla/garden-cli": "^1.6"
@@ -306,7 +306,47 @@
                 }
             ],
             "description": "A multi purpose forking daemon subsystem for long running PHP applications.",
-            "time": "2017-11-14T21:33:33+00:00"
+            "time": "2018-01-30T18:53:19+00:00"
+        },
+        {
+            "name": "vanilla/garden-db",
+            "version": "v0.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vanilla/garden-db.git",
+                "reference": "f59c10a8720c431ba3899791b19b73b34ceaae91"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vanilla/garden-db/zipball/f59c10a8720c431ba3899791b19b73b34ceaae91",
+                "reference": "f59c10a8720c431ba3899791b19b73b34ceaae91",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0",
+                "vanilla/garden-schema": "^1.7.5"
+            },
+            "require-dev": {
+                "bobthecow/faker": "dev-master"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Garden\\Db\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Todd Burry",
+                    "email": "todd@vanillaforums.com"
+                }
+            ],
+            "description": "A light but powerful database abstraction layer.",
+            "time": "2018-03-05T18:27:54+00:00"
         },
         {
             "name": "vanilla/garden-http",
@@ -349,15 +389,62 @@
             "time": "2017-06-20T21:44:22+00:00"
         },
         {
+            "name": "vanilla/garden-schema",
+            "version": "v1.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vanilla/garden-schema.git",
+                "reference": "3370db6fe8a2987813a28e64e3afdf95cb3b9443"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vanilla/garden-schema/zipball/3370db6fe8a2987813a28e64e3afdf95cb3b9443",
+                "reference": "3370db6fe8a2987813a28e64e3afdf95cb3b9443",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Garden\\Schema\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Todd Burry",
+                    "email": "todd@vanillaforums.com"
+                }
+            ],
+            "description": "A simple data validation and cleaning library based on JSON Schema.",
+            "time": "2018-06-26T20:36:25+00:00"
+        },
+        {
             "name": "vanilla/queue-interop",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "git@github.com:vanilla/queue-interop.git",
-                "reference": "9ebf2d907f478e2ca55333506cbd9df36ed9abda"
+                "url": "https://github.com/vanilla/queue-interop.git",
+                "reference": "b4ad707865e6f223e6756884ab1c8e9b90241b44"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vanilla/queue-interop/zipball/b4ad707865e6f223e6756884ab1c8e9b90241b44",
+                "reference": "b4ad707865e6f223e6756884ab1c8e9b90241b44",
+                "shasum": ""
             },
             "require": {
-                "php": ">=7.0"
+                "php": ">=7.0",
+                "psr/log": "^1.0",
+                "vanilla/garden-db": "^0.1.0"
             },
             "type": "library",
             "autoload": {
@@ -365,6 +452,7 @@
                     "Garden\\QueueInterop\\": "src"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -375,7 +463,7 @@
                 }
             ],
             "description": "Queue interop.",
-            "time": "2017-01-23T20:57:46+00:00"
+            "time": "2018-08-02T18:38:04+00:00"
         }
     ],
     "packages-dev": [],

@@ -13,12 +13,6 @@
             "homepage": "https://vanillaforums.com"
         }
     ],
-    "repositories": [
-        {
-            "type": "git",
-            "url": "git@github.com:vanilla/queue-interop.git"
-        }
-    ],
     "config": {
         "bin-dir": "./"
     },
