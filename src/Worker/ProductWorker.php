@@ -465,7 +465,8 @@ class ProductWorker extends AbstractQueueWorker {
         $commandArgs = $slotQueues;
         $commandArgs[] = [
             'nohang' => true,
-            'withcounters' => true
+            'withcounters' => true,
+            'timeout' => 0
         ];
 
         // Get job from slot queues
