@@ -96,7 +96,7 @@ trait LoggerBoilerTrait {
      * @param string $level logger event level
      * @param string $message
      * @param array $context optional.
-     * @param type $options optional.
+     * @param array $options optional.
      */
     protected function log(string $level, string $message, array $context = []) {
         if (!is_array($context)) {
@@ -108,7 +108,7 @@ trait LoggerBoilerTrait {
             'message' => $message
         ], $context);
 
-        $this->getLogger()->log($level, $message, $context);
+        $this->getLogger()->log($level, "{date} - {$message}", $context);
     }
 
 }
