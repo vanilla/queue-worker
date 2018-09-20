@@ -108,7 +108,7 @@ trait LoggerBoilerTrait {
             'message' => $message
         ], $context);
 
-        $this->getLogger()->log($level, "{date} - {$message}", $context);
+        $this->getLogger()->log($level, "{time} - {$message}", $context);
     }
 
 }
