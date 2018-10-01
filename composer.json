@@ -28,7 +28,8 @@
         "vanilla/garden-http": "^1.1",
         "vanilla/queue-interop": "dev-master",
         "psr/log": "^1.0",
-        "mariano/disque-php": "^2.0"
+        "mariano/disque-php": "^2.0",
+        "sendgrid/sendgrid": "~7"
     },
     "autoload": {
         "psr-4": {
