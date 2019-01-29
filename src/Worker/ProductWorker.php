@@ -271,7 +271,7 @@ class ProductWorker extends AbstractQueueWorker {
                 $this->queue->ackJob($message->getID());
 
                 // Dead letter handler
-                $this->failedMessage($message, $jobStatus, $reason);
+                $this->failedMessage($message, $jobStatus, $reason, $ex);
 
             } else if ($jobStatus != JobStatus::COMPLETE) {
 
@@ -411,15 +411,16 @@ class ProductWorker extends AbstractQueueWorker {
      * @param Message $message
      * @param string $level
      * @param string $reason optional
+     * @param \Exception $e
      */
-    public function failedMessage(Message $message, string $level, string $reason = null) {
+    public function failedMessage(Message $message, string $level, string $reason = null, \Throwable $e = null) {
         $this->log(LogLevel::WARNING, "Message could not be handled [{job}]: {reason}", [
             'job'       => $message->getPayloadType(),
             'level'     => $level,
             'reason'    => $reason
         ]);
 
-        $this->fire('failedMessage', [$message, $level, $reason]);
+        $this->fire('failedMessage', [$message, $level, $reason, $e]);
     }
 
     /**
