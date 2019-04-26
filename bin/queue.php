@@ -17,13 +17,14 @@ use Vanilla\QueueWorker\QueueWorker;
 
 // Switch to queue root
 chdir(dirname($argv[0]));
+$DIR = getcwd();
 
 // Include the core autoloader.
 
 $paths = [
-    __DIR__.'/vendor/autoload.php',     // symlinked bin
-    __DIR__.'/../vendor/autoload.php',  // locally
-    __DIR__.'/../../../autoload.php'    // dependency
+    $DIR.'/vendor/autoload.php',     // symlinked bin
+    $DIR.'/../vendor/autoload.php',  // locally
+    $DIR.'/../../../autoload.php'    // dependency
 ];
 foreach ($paths as $path) {
     if (file_exists($path)) {
@@ -33,7 +34,7 @@ foreach ($paths as $path) {
 }
 
 // Run bootstrap
-QueueWorker::bootstrap(__DIR__);
+QueueWorker::bootstrap($DIR);
 
 $exitCode = 0;
 try {
