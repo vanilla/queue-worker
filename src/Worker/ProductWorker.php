@@ -390,13 +390,14 @@ class ProductWorker extends AbstractQueueWorker {
             throw new UnknownJobException($message, "specified job class cannot be found");
         }
 
+        // Create job instance
+        $job = $workerDI->get($payloadType);
+
         // Check that the job is legal
-        if (!is_a($payloadType, JobInterface::class, true)) {
+        if (!$job instanceof JobInterface) {
             throw new BrokenJobException($message, "specified job class does not implement JobInterface");
         }
 
-        // Create job instance
-        $job = $workerDI->get($payloadType);
         $job->setID($message->getID());
         $job->setData($message->getBody());
         return $job;
