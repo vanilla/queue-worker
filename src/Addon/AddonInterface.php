@@ -2,7 +2,7 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Addon;
@@ -11,10 +11,9 @@ namespace Vanilla\QueueWorker\Addon;
  * Queue Worker Addon interface.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @since 1.0
  */
-interface AddonInterface {
+interface AddonInterface
+{
 
     /**
      * Set addon marker

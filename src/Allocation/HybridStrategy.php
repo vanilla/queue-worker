@@ -2,7 +2,7 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Allocation;
@@ -15,19 +15,19 @@ namespace Vanilla\QueueWorker\Allocation;
  * first.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @version 1.0
  */
-class HybridStrategy implements AllocationStrategyInterface {
-
+class HybridStrategy implements AllocationStrategyInterface
+{
     /**
      * Allocate workers using hybrid strategy
      *
      * @param int $workers
      * @param array $queues
+     *
      * @return array
      */
-    public function allocate(int $workers, array $queues): array {
+    public function allocate(int $workers, array $queues): array
+    {
         $availableWorkers = $workers;
 
         $distribution = [];

@@ -2,42 +2,56 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Message\Parser;
 
+use Vanilla\QueueWorker\Exception\InvalidMessageWorkerException;
 use Vanilla\QueueWorker\Message\Message;
 
 /**
- * Native queue message parser
+ * NativeMessageParser
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @version 1.0
+ * @author Eduardo Garcia Julia <eduardo.garciajulia@vanillaforums.com>
  */
-class NativeMessageParser extends AbstractMessageParser {
-
+class NativeMessageParser implements ParserInterface
+{
     /**
      * Decode message from queue
      *
      * @param array $rawMessage
-     * @return Message
-     */
-    public function decodeMessage(array $rawMessage): Message {
-        // Extract message features
-        $fields = $this->extractMessageFields($rawMessage);
-        return new Message($fields['id'], $fields['headers'], $fields['body'], $fields['extras']);
-    }
-
-    /**
-     * Encode message for queue insertion
      *
-     * @param Message $message
-     * @return array
+     * @return \Vanilla\QueueWorker\Message\Message
+     * @throws \Vanilla\QueueWorker\Exception\InvalidMessageWorkerException
      */
-    public function encodeMessage(Message $message) {
-        return [$message->getHeaders(), $message->getBody()];
-    }
+    public function decodeMessage(array $rawMessage): Message
+    {
+        $mandatoryFields = ['id','queue','nacks','additional-deliveries'];
 
+        foreach ($mandatoryFields as $mandatoryField) {
+            if (!isset($rawMessage[$mandatoryField])) {
+                throw new InvalidMessageWorkerException(null, "Message cannot be processed. Missing mandatory field `{$mandatoryField}`");
+            }
+        }
+
+        $body = json_decode($rawMessage['body'], true);
+
+        $headers = [
+            'broker_id' => $rawMessage['id'],
+            'broker_queue' => $rawMessage['queue'],
+            'broker_nacks' => $rawMessage['nacks'],
+            'broker_additional-deliveries' => $rawMessage['additional-deliveries'],
+        ];
+
+        if (count($body) == 2) {
+            // Get headers
+            $headers = array_merge($headers, $body[0]);
+            // Get body
+            $body = $body[1];
+        }
+
+        return new Message($headers, $body);
+    }
 }

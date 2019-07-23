@@ -2,33 +2,29 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Addon;
 
-use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
-
+use Exception;
+use Garden\Container\Reference;
 use Kaecyra\AppCommon\AbstractConfig;
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
-
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LogLevel;
-
-use Psr\Container\ContainerInterface;
-use Garden\Container\Reference;
+use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 
 /**
  * Queue Worker Addon manager
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @since 1.0
  */
-class AddonManager implements LoggerAwareInterface, EventAwareInterface {
-
+class AddonManager implements LoggerAwareInterface, EventAwareInterface
+{
     use LoggerBoilerTrait;
     use LoggerAwareTrait;
     use EventAwareTrait;
@@ -69,7 +65,14 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      */
     protected $autoload;
 
-    public function __construct(ContainerInterface $container, array $scanDirs) {
+    /**
+     * AddonManager constructor.
+     *
+     * @param \Psr\Container\ContainerInterface $container
+     * @param array $scanDirs
+     */
+    public function __construct(ContainerInterface $container, array $scanDirs)
+    {
         $this->container = $container;
         $this->sources = [];
         $this->addons = [];
@@ -92,7 +95,8 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      *
      * @param string $class
      */
-    public function autoload($class) {
+    public function autoload($class)
+    {
         $classKey = strtolower($class);
 
         if (isset($this->autoload[$classKey])) {
@@ -105,9 +109,11 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      * Add addon scan source
      *
      * @param string $sourceDir
+     *
      * @return AddonManager
      */
-    public function addSource($sourceDir) {
+    public function addSource($sourceDir)
+    {
         if (is_dir($sourceDir)) {
             $this->sources[] = $sourceDir;
         }
@@ -120,7 +126,8 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      *
      * @return void
      */
-    public function scanSourceFolders() {
+    public function scanSourceFolders()
+    {
         $this->addons = [];
         foreach ($this->sources as $sourceDir) {
             $this->scanSource($sourceDir);
@@ -132,7 +139,8 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      *
      * @param string $sourceDir
      */
-    public function scanSource($sourceDir) {
+    public function scanSource($sourceDir)
+    {
         $this->log(LogLevel::INFO, "Scanning addon source: {$sourceDir}");
 
         $addonsCandidates = scandir($sourceDir);
@@ -151,10 +159,10 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
 
             try {
                 $addon = new Addon(realpath($definitionFile));
-            } catch (\Exception $ex) {
+            } catch (Exception $ex) {
                 $this->log(LogLevel::WARNING, " failed loading addon '{definition}': {message}", [
                     'definition' => $definitionFile,
-                    'message' => $ex->getMessage()
+                    'message' => $ex->getMessage(),
                 ]);
                 continue;
             }
@@ -164,7 +172,7 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
                 'name' => $addon->getInfo('name'),
                 'version' => $addon->getInfo('version'),
                 'path' => $addon->getPath(),
-                'classes' => count($addon->getClasses())
+                'classes' => count($addon->getClasses()),
             ]);
 
             $this->addons[$addon->getInfo('name')] = $addon;
@@ -175,14 +183,11 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      * Start addons
      *
      * @param array $addons list of addon keys
+     *
+     * @throws \Exception
      */
-    public function startAddons($addons) {
-
-        // Scan source folders
-        $this->scanSourceFolders();
-
-        $this->log(LogLevel::NOTICE, "Starting addons");
-
+    public function startAddons($addons)
+    {
         // Include and instantiate active addons
         $this->enabled = [];
 
@@ -201,15 +206,15 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      * Start an addon
      *
      * @param string $addonName addon name
-     * @return boolean load success status
+     * @param int $level
+     *
+     * @return bool load success status
+     * @throws \Exception
      */
-    public function startAddon($addonName, $level = 0) {
+    public function startAddon($addonName, $level = 0)
+    {
 
         $nest = str_repeat(' ', $level);
-
-        $this->log(LogLevel::NOTICE, "{$nest} start addon: {addon}", [
-            'addon' => $addonName
-        ]);
 
         // Short circuit if already started
         if ($this->isStarted($addonName)) {
@@ -230,9 +235,6 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
         // If we have requirements, try to load them
         if (count($requiredAddons)) {
             $txtRequirements = implode(',', $requiredAddons);
-            $this->log(LogLevel::INFO, "{$nest}  addon has requirements: {requirements}", [
-                'requirements' => $txtRequirements
-            ]);
 
             // Check if the requirements are all available
             $missing = [];
@@ -243,8 +245,11 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
             }
             if (count($missing)) {
                 $txtMissing = implode(',', $missing);
+                $this->log(LogLevel::INFO, "{$nest}  addon has requirements: {requirements}", [
+                    'requirements' => $txtRequirements,
+                ]);
                 $this->log(LogLevel::WARNING, "{$nest}  missing requirements: {missing}", [
-                    'missing' => $txtMissing
+                    'missing' => $txtMissing,
                 ]);
                 return false;
             }
@@ -260,14 +265,14 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
                     // Try to load addon if available
                     $loadedRequirement = false;
                     if ($this->isAvailable($requiredAddon)) {
-                        $loadedRequirement = $this->startAddon($requiredAddon, $level+1);
+                        $loadedRequirement = $this->startAddon($requiredAddon, $level + 1);
                     }
 
                     $loadedAllRequirements &= $loadedRequirement;
 
                     if (!$loadedRequirement) {
                         $this->log(LogLevel::WARNING, "{$nest}  failed starting required addon: {addon}", [
-                            'addon' => $requiredAddon
+                            'addon' => $requiredAddon,
                         ]);
                         return false;
                     }
@@ -282,17 +287,13 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
 
         $addonClass = $addon->getAddonClass();
         if ($addonClass) {
-
-            $this->log(LogLevel::INFO, "{$nest}  creating addon instance: {$addonClass}");
-
             // Get instance
             $instance = $this->container->getArgs($addonClass, [
-                new Reference([AbstractConfig::class, "addons.addon.{$addonName}"])
+                new Reference([AbstractConfig::class, "addons.addon.{$addonName}"]),
             ]);
             $instance->setAddon($addon);
             $this->instances[$addonName] = $instance;
             $instance->start();
-
         }
 
         $this->enabled[$addonName] = true;
@@ -304,9 +305,11 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      * Check if a addon is available for loading
      *
      * @param string $addonName
+     *
      * @return boolean
      */
-    public function isAvailable($addonName) {
+    public function isAvailable($addonName)
+    {
         return ($this->addons[$addonName] ?? false) instanceof Addon;
     }
 
@@ -314,9 +317,11 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      * Check if a addon is loaded
      *
      * @param string $addonName
+     *
      * @return boolean
      */
-    public function isStarted($addonName) {
+    public function isStarted($addonName)
+    {
         return ($this->enabled[$addonName] ?? false) === true;
     }
 
@@ -324,9 +329,11 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      * List addons
      *
      * @param bool $active optionally list only active addons
+     *
      * @return array
      */
-    public function getAddons($active = false) {
+    public function getAddons($active = false)
+    {
         if ($active) {
             return array_keys($this->enabled);
         }
@@ -337,7 +344,8 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      * List active addons
      * @return array
      */
-    public function getActiveAddons() {
+    public function getActiveAddons()
+    {
         return $this->getAddons(true);
     }
 
@@ -345,12 +353,14 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      * Get addon marker
      *
      * @param string $addonName
-     * @throws \Exception
+     *
      * @return Addon
+     * @throws \Exception
      */
-    public function getAddon($addonName) {
+    public function getAddon($addonName)
+    {
         if (!$this->isAvailable($addonName)) {
-            throw new \Exception("Tried to get marker of unknown addon '{$addonName}'");
+            throw new Exception("Tried to get marker of unknown addon '{$addonName}'");
         }
         return $this->addons[$addonName];
     }
@@ -359,16 +369,18 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface {
      * Get addon instance
      *
      * @param string $addonName
-     * @throws \Exception
+     *
      * @return AddonInterface
+     * @throws \Exception
      */
-    public function getInstance($addonName) {
+    public function getInstance($addonName)
+    {
         if (!$this->isStarted($addonName)) {
-            throw new \Exception("Tried to get instance of inactive addon '{$addonName}'");
+            throw new Exception("Tried to get instance of inactive addon '{$addonName}'");
         }
 
         if (!array_key_exists($addonName, $this->instances) || !($this->instances[$addonName] instanceof AddonInterface)) {
-            throw new \Exception("Addon '{$addonName}' has no instance");
+            throw new Exception("Addon '{$addonName}' has no instance");
         }
 
         return $this->instances[$addonName];

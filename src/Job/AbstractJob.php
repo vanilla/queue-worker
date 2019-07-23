@@ -2,91 +2,87 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2018 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Job;
 
-use Garden\QueueInterop\Job\JobInterface;
-use Garden\QueueInterop\Job\JobStatus;
-
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
 use Kaecyra\AppCommon\Log\LoggerBoilerTrait;
-use Kaecyra\AppCommon\Store;
-
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Vanilla\QueueWorker\Exception\JobRetryException;
+use Vanilla\QueueWorker\Message\Message;
+use Vanilla\QueueWorker\Worker\WorkerStatus;
 
 /**
- * Queue job interface.
+ * AbstractJob interface.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @version 1.0
  */
-abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventAwareInterface {
-
+abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventAwareInterface
+{
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
     use EventAwareTrait;
 
     /**
-     * Job message ID
-     * @var string
+     * @var Message
      */
-    protected $id;
+    protected $message;
 
     /**
      * Job execution status
-     * @var string
+     *
+     * @var WorkerStatus
      */
     protected $status;
 
     /**
-     * Job data
-     * @var Store
+     * @param \Vanilla\QueueWorker\Message\Message $message
      */
-    protected $data;
-
-    /**
-     * Job start time
-     * @var float
-     */
-    protected $startTime;
-
-    /**
-     * Job duration
-     * @var float
-     */
-    protected $duration;
-
-    /**
-     * Prepare job
-     *
-     */
-    public function __construct() {
-        $this->setStatus(JobStatus::RECEIVED);
-        $this->startTime = microtime(true);
-        $this->data = new Store;
+    public function setMessage(Message $message)
+    {
+        $this->message = $message;
     }
 
     /**
-     * Set job id
-     *
-     * @param string $id
+     * @return \Vanilla\QueueWorker\Message\Message
      */
-    public function setID(string $id) {
-        $this->id = $id;
+    public function getMessage(): Message
+    {
+        return ($this->message === null) ? new Message([], []) : $this->message;
     }
 
     /**
-     * Get job ID
+     * Set message handling status
+     *
+     * @param WorkerStatus $status
+     */
+    public function setStatus(WorkerStatus $status)
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * Get message handling status
+     *
+     * @return WorkerStatus
+     */
+    public function getStatus(): WorkerStatus
+    {
+        return ($this->status === null) ? WorkerStatus::unknown() : $this->status;
+    }
+
+    /**
+     * Get broker id
      *
      * @return string
      */
-    public function getID(): string {
-        return $this->id;
+    public function getBrokerId(): string
+    {
+        return $this->getMessage()->getBrokerId();
     }
 
     /**
@@ -94,82 +90,83 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      * @return string
      */
-    public function getName(): string {
+    public function getName(): string
+    {
         return static::class;
     }
 
     /**
-     * Get message handling status
-     *
-     * @return string
-     */
-    public function getStatus(): string {
-        return $this->status;
-    }
-
-    /**
-     * Set message handling status
-     *
-     * @param string $status
-     */
-    public function setStatus(string $status) {
-        $this->status = $status;
-    }
-
-    /**
-     * Get job data
+     * Get message body
      *
      * @return array
      */
-    public function getData(): array {
-        return $this->data->dump();
+    public function getBody(): array
+    {
+        return $this->getMessage()->getBody();
     }
 
     /**
-     * Set job data
-     *
-     * @param array $data
-     */
-    public function setData(array $data) {
-        $this->data->prepare($data);
-    }
-
-    /**
-     * Get key from payload
+     * Get key from message body
      *
      * @param string $key
      * @param mixed $default
      *
      * @return mixed
      */
-    public function get(string $key, $default = null) {
-        return $this->data->get($key);
+    public function getBodyKey(string $key, $default = null)
+    {
+        return $this->getMessage()->getBodyKey($key, $default);
+    }
+
+    /**
+     * Get key from message header
+     *
+     * @param string $key
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function getHeaderKey(string $key, $default = null)
+    {
+        return $this->getMessage()->getHeaderKey($key, $default);
+    }
+
+    /**
+     * Get message header
+     *
+     * @return array
+     */
+    public function getHeader(): array
+    {
+        return $this->getMessage()->getHeader();
     }
 
     /**
      * NOOP Setup
      *
      */
-    public function setup() {
-        $this->setStatus(JobStatus::INPROGRESS);
+    public function setup()
+    {
+        $this->setStatus(WorkerStatus::progress());
     }
 
     /**
      * NOOP Teardown
      *
      */
-    public function teardown() {
-        $this->setStatus(JobStatus::COMPLETE);
-        $this->duration = microtime(true) - $this->startTime;
+    public function teardown()
+    {
+        /**
+         * If the Job doesn't set a WorkerStatus in the run method, we set the WorkerStatus as Complete
+         * Otherwise, we respect the run method wishes
+         */
+        if ($this->getStatus()->is(WorkerStatus::progress())) {
+            $this->setStatus(WorkerStatus::complete());
+        }
     }
 
     /**
-     * Get execution time
-     *
-     * @return float
+     * @throws JobRetryException
      */
-    public function getDuration(): float {
-        return $this->duration ? $this->duration : microtime(true) - $this->startTime;
-    }
-
+    abstract public function run();
 }

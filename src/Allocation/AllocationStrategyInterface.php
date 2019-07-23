@@ -2,7 +2,7 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Allocation;
@@ -11,11 +11,14 @@ namespace Vanilla\QueueWorker\Allocation;
  * Allocation strategy interface
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @version 1.0
  */
-interface AllocationStrategyInterface {
-
+interface AllocationStrategyInterface
+{
+    /**
+     * @param int $workers
+     * @param array $queues
+     *
+     * @return array
+     */
     public function allocate(int $workers, array $queues): array;
-
 }

@@ -1,7 +1,12 @@
 {
     "name": "vanilla/queue-worker",
     "description": "Vanilla distributed message queue worker",
-    "keywords": ["vanilla","queue","worker","distributed"],
+    "keywords": [
+        "vanilla",
+        "queue",
+        "worker",
+        "distributed"
+    ],
     "homepage": "https://github.com/vanilla/queue-worker",
     "type": "library",
     "license": "proprietary",
@@ -20,13 +25,12 @@
         "bin/queue.php"
     ],
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.2",
         "kaecyra/app-common": "^1.0",
         "vanilla/garden-container": "^2.0",
         "vanilla/garden-daemon": "^1.1",
         "vanilla/garden-cli": "^1.6",
         "vanilla/garden-http": "^1.1",
-        "vanilla/queue-interop": "dev-master",
         "psr/log": "^1.0",
         "mariano/disque-php": "^2.0",
         "sendgrid/sendgrid": "~7"

@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c00eddbcc9476c2d15d266c65bba5d0",
+    "content-hash": "af7389bcdbe6f3b3d73f1a6c61b79cba",
     "packages": [
         {
             "name": "kaecyra/app-common",
-            "version": "v1.1.5",
+            "version": "v1.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kaecyra/app-common.git",
-                "reference": "2f141faba6b43916e10159cc967e0e74efb2afa7"
+                "reference": "8dbcf70c575fb587614b45da8ec02d098e3e843b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kaecyra/app-common/zipball/2f141faba6b43916e10159cc967e0e74efb2afa7",
-                "reference": "2f141faba6b43916e10159cc967e0e74efb2afa7",
+                "url": "https://api.github.com/repos/kaecyra/app-common/zipball/8dbcf70c575fb587614b45da8ec02d098e3e843b",
+                "reference": "8dbcf70c575fb587614b45da8ec02d098e3e843b",
                 "shasum": ""
             },
             "require": {
@@ -50,7 +50,7 @@
             "keywords": [
                 "app-common"
             ],
-            "time": "2018-03-05T15:54:16+00:00"
+            "time": "2018-09-05T18:19:23+00:00"
         },
         {
             "name": "mariano/disque-php",
@@ -106,12 +106,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/container.git",
-                "reference": "2cc4a01788191489dc7459446ba832fa79a216a7"
+                "reference": "014d250daebff39eba15ba990eeb2a140798e77c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/container/zipball/2cc4a01788191489dc7459446ba832fa79a216a7",
-                "reference": "2cc4a01788191489dc7459446ba832fa79a216a7",
+                "url": "https://api.github.com/repos/php-fig/container/zipball/014d250daebff39eba15ba990eeb2a140798e77c",
+                "reference": "014d250daebff39eba15ba990eeb2a140798e77c",
                 "shasum": ""
             },
             "require": {
@@ -147,7 +147,7 @@
                 "container-interop",
                 "psr"
             ],
-            "time": "2017-06-28T15:35:32+00:00"
+            "time": "2018-12-29T15:36:03+00:00"
         },
         {
             "name": "psr/log",
@@ -155,12 +155,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda"
+                "reference": "c4421fcac1edd5a324fda73e589a5cf96e52ffd0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda",
-                "reference": "3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/c4421fcac1edd5a324fda73e589a5cf96e52ffd0",
+                "reference": "c4421fcac1edd5a324fda73e589a5cf96e52ffd0",
                 "shasum": ""
             },
             "require": {
@@ -169,7 +169,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "autoload": {
@@ -194,7 +194,114 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2018-04-03T15:59:15+00:00"
+            "time": "2018-11-21T13:42:00+00:00"
+        },
+        {
+            "name": "sendgrid/php-http-client",
+            "version": "3.9.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sendgrid/php-http-client.git",
+                "reference": "e9a04d949ee2d19938ab83dc100933a3b41a8ec7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sendgrid/php-http-client/zipball/e9a04d949ee2d19938ab83dc100933a3b41a8ec7",
+                "reference": "e9a04d949ee2d19938ab83dc100933a3b41a8ec7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.4",
+                "squizlabs/php_codesniffer": "~2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SendGrid\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Matt Bernier",
+                    "email": "dx@sendgrid.com"
+                },
+                {
+                    "name": "Elmer Thomas",
+                    "email": "elmer@thinkingserious.com"
+                }
+            ],
+            "description": "HTTP REST client, simplified for PHP",
+            "homepage": "http://github.com/sendgrid/php-http-client",
+            "keywords": [
+                "api",
+                "fluent",
+                "http",
+                "rest",
+                "sendgrid"
+            ],
+            "time": "2018-04-10T18:06:08+00:00"
+        },
+        {
+            "name": "sendgrid/sendgrid",
+            "version": "v7.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sendgrid/sendgrid-php.git",
+                "reference": "883c3b98cace58d08fd4fe09e55f54d35e706eb5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sendgrid/sendgrid-php/zipball/883c3b98cace58d08fd4fe09e55f54d35e706eb5",
+                "reference": "883c3b98cace58d08fd4fe09e55f54d35e706eb5",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "php": ">=5.6",
+                "sendgrid/php-http-client": "~3.9"
+            },
+            "replace": {
+                "sendgrid/sendgrid-php": "*"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7.9 || ^6.4.3",
+                "squizlabs/php_codesniffer": "3.*",
+                "swaggest/json-diff": "^3.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SendGrid\\": "lib/",
+                    "SendGrid\\Mail\\": "lib/mail/",
+                    "SendGrid\\Contacts\\": "lib/contacts/",
+                    "SendGrid\\Stats\\": "lib/stats/"
+                },
+                "files": [
+                    "lib/SendGrid.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "This library allows you to quickly and easily send emails through SendGrid using PHP.",
+            "homepage": "http://github.com/sendgrid/sendgrid-php",
+            "keywords": [
+                "email",
+                "grid",
+                "send",
+                "sendgrid"
+            ],
+            "time": "2018-05-19T16:18:36+00:00"
         },
         {
             "name": "vanilla/garden-cli",
@@ -234,16 +341,16 @@
         },
         {
             "name": "vanilla/garden-container",
-            "version": "v2.0.1",
+            "version": "v2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vanilla/garden-container.git",
-                "reference": "df19515548ed619320a3214f15848f98a5592d15"
+                "reference": "25f213022d41292c69425573c9bac98d9deb703e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vanilla/garden-container/zipball/df19515548ed619320a3214f15848f98a5592d15",
-                "reference": "df19515548ed619320a3214f15848f98a5592d15",
+                "url": "https://api.github.com/repos/vanilla/garden-container/zipball/25f213022d41292c69425573c9bac98d9deb703e",
+                "reference": "25f213022d41292c69425573c9bac98d9deb703e",
                 "shasum": ""
             },
             "require": {
@@ -267,7 +374,7 @@
                 }
             ],
             "description": "A dependency injection container.",
-            "time": "2017-05-05T17:50:58+00:00"
+            "time": "2018-08-13T20:13:16+00:00"
         },
         {
             "name": "vanilla/garden-daemon",
@@ -309,57 +416,17 @@
             "time": "2018-01-30T18:53:19+00:00"
         },
         {
-            "name": "vanilla/garden-db",
-            "version": "v0.1.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/vanilla/garden-db.git",
-                "reference": "f59c10a8720c431ba3899791b19b73b34ceaae91"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/vanilla/garden-db/zipball/f59c10a8720c431ba3899791b19b73b34ceaae91",
-                "reference": "f59c10a8720c431ba3899791b19b73b34ceaae91",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.0",
-                "vanilla/garden-schema": "^1.7.5"
-            },
-            "require-dev": {
-                "bobthecow/faker": "dev-master"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Garden\\Db\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Todd Burry",
-                    "email": "todd@vanillaforums.com"
-                }
-            ],
-            "description": "A light but powerful database abstraction layer.",
-            "time": "2018-03-05T18:27:54+00:00"
-        },
-        {
             "name": "vanilla/garden-http",
-            "version": "v1.1.3",
+            "version": "v1.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vanilla/garden-http.git",
-                "reference": "4eeb8b7e0f54f2403308b0c43804b611a6fd4e2a"
+                "reference": "020b7b117ef99decef062be0978fb8d292c3e06c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vanilla/garden-http/zipball/4eeb8b7e0f54f2403308b0c43804b611a6fd4e2a",
-                "reference": "4eeb8b7e0f54f2403308b0c43804b611a6fd4e2a",
+                "url": "https://api.github.com/repos/vanilla/garden-http/zipball/020b7b117ef99decef062be0978fb8d292c3e06c",
+                "reference": "020b7b117ef99decef062be0978fb8d292c3e06c",
                 "shasum": ""
             },
             "require": {
@@ -386,96 +453,17 @@
                 }
             ],
             "description": "An unbloated HTTP client library for building RESTful API clients.",
-            "time": "2017-06-20T21:44:22+00:00"
-        },
-        {
-            "name": "vanilla/garden-schema",
-            "version": "v1.9",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/vanilla/garden-schema.git",
-                "reference": "3370db6fe8a2987813a28e64e3afdf95cb3b9443"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/vanilla/garden-schema/zipball/3370db6fe8a2987813a28e64e3afdf95cb3b9443",
-                "reference": "3370db6fe8a2987813a28e64e3afdf95cb3b9443",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.6.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^6"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Garden\\Schema\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Todd Burry",
-                    "email": "todd@vanillaforums.com"
-                }
-            ],
-            "description": "A simple data validation and cleaning library based on JSON Schema.",
-            "time": "2018-06-26T20:36:25+00:00"
-        },
-        {
-            "name": "vanilla/queue-interop",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/vanilla/queue-interop.git",
-                "reference": "b4ad707865e6f223e6756884ab1c8e9b90241b44"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/vanilla/queue-interop/zipball/b4ad707865e6f223e6756884ab1c8e9b90241b44",
-                "reference": "b4ad707865e6f223e6756884ab1c8e9b90241b44",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.0",
-                "psr/log": "^1.0",
-                "vanilla/garden-db": "^0.1.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Garden\\QueueInterop\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Tim Gunter",
-                    "email": "tim@vanillaforums.com"
-                }
-            ],
-            "description": "Queue interop.",
-            "time": "2018-08-02T18:38:04+00:00"
+            "time": "2019-06-03T21:18:24+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "vanilla/queue-interop": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.0"
+        "php": ">=7.2"
     },
     "platform-dev": []
 }

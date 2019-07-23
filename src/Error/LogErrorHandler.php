@@ -1,25 +1,21 @@
 <?php
 
 /**
- * @license MIT
- * @copyright 2016 Tim Gunter
+ * @license Proprietary
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Error;
 
-use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
-
 use Garden\Daemon\ErrorHandlerInterface;
-
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Psr\Log\LogLevel;
+use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 
 /**
  * Queue log error handler
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package garden-daemon
  */
 class LogErrorHandler implements ErrorHandlerInterface, LoggerAwareInterface {
 

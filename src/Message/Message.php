@@ -2,7 +2,7 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Message;
@@ -11,74 +11,34 @@ namespace Vanilla\QueueWorker\Message;
  * Queue message.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @version 1.0
+ * @author Eduardo Garcia Julia <eduardo.garciajulia@vanillaforums.com>
  */
-class Message {
-
-    /**
-     * Message ID
-     * @var string
-     */
-    protected $id;
-
+class Message
+{
     /**
      * Message Headers
+     *
      * @var array
      */
-    protected $headers;
+    protected $header;
 
     /**
      * Message Body
+     *
      * @var array
      */
     protected $body;
 
     /**
-     * Message Extras
-     * @var array
-     */
-    protected $extras;
-
-    /**
-     * Message Queue
-     * @var string
-     */
-    protected $queue;
-
-    /**
      * Create message
      *
-     * @param string $id
-     * @param array $headers
+     * @param array $header
      * @param array $body
-     * @param array $extras optional
      */
-    public function __construct(string $id, array $headers, array $body, array $extras = []) {
-        $this->id = $id;
-        $this->headers = $headers;
+    public function __construct(array $header, array $body)
+    {
+        $this->header = $header;
         $this->body = $body;
-        $this->extras = $extras;
-
-        $this->queue = $this->headers['queue'] ?? '';
-    }
-
-    /**
-     * Get message ID
-     *
-     * @return string
-     */
-    public function getID(): string {
-        return $this->id;
-    }
-
-    /**
-     * Get message headers
-     *
-     * @return array
-     */
-    public function getHeaders(): array {
-        return $this->headers;
     }
 
     /**
@@ -86,8 +46,53 @@ class Message {
      *
      * @return array
      */
-    public function getBody(): array {
+    public function getBody(): array
+    {
         return $this->body;
+    }
+
+    /**
+     * @param string $key
+     * @param null $default
+     *
+     * @return mixed
+     */
+    public function getBodyKey(string $key, $default = null)
+    {
+        return valr(trim($key), $this->body, $default);
+    }
+
+    /**
+     * Get header
+     *
+     * @return array
+     */
+    public function getHeader(): array
+    {
+        return $this->header;
+    }
+
+    /**
+     * Get header key
+     *
+     * @param string $key
+     * @param null $default
+     *
+     * @return mixed|null
+     */
+    public function getHeaderKey(string $key, $default = null)
+    {
+        return valr(trim($key), $this->header, $default);
+    }
+
+    /**
+     * Get message ID
+     *
+     * @return string
+     */
+    public function getBrokerId(): string
+    {
+        return $this->getHeaderKey('broker_id', "N/A");
     }
 
     /**
@@ -95,36 +100,19 @@ class Message {
      *
      * @return string
      */
-    public function getQueue(): string {
-        return $this->queue;
+    public function getQueue(): string
+    {
+        return $this->getHeaderKey('broker_queue', 'N/A');
     }
 
     /**
      * Get job payload type
      *
-     * @return string|null
+     * @return string
      */
-    public function getPayloadType(): string {
-        return $this->headers['job'] ?? null;
-    }
-
-    /**
-     * Get extras
-     *
-     * @return array
-     */
-    public function getExtras(): array {
-        return $this->extras;
-    }
-
-    /**
-     * Get extra
-     *
-     * @param string $key
-     * @return mixed
-     */
-    public function getExtra(string $key) {
-        return $this->extras[$key] ?? null;
+    public function getType(): string
+    {
+        return $this->getHeaderKey('type', 'N/A');
     }
 
 }
