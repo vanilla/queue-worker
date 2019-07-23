@@ -16,22 +16,11 @@ use Psr\Log\LogLevel;
 use Vanilla\QueueWorker\QueueWorker;
 
 // Switch to queue root
-chdir(dirname($argv[0]));
+chdir(dirname(realpath(__FILE__)));
 $DIR = getcwd();
 
 // Include the core autoloader.
-
-$paths = [
-    $DIR.'/vendor/autoload.php',     // symlinked bin
-    $DIR.'/../vendor/autoload.php',  // locally
-    $DIR.'/../../../autoload.php'    // dependency
-];
-foreach ($paths as $path) {
-    if (file_exists($path)) {
-        require_once $path;
-        break;
-    }
-}
+require_once $DIR.'/vendor/autoload.php';
 
 // Run bootstrap
 QueueWorker::bootstrap($DIR);
