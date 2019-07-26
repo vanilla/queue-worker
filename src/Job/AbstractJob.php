@@ -7,9 +7,6 @@
 
 namespace Vanilla\QueueWorker\Job;
 
-use Garden\QueueInterop\Job\JobInterface;
-use Garden\QueueInterop\Job\JobStatus;
-
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
 use Kaecyra\AppCommon\Log\LoggerBoilerTrait;
@@ -33,43 +30,38 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
 
     /**
      * Job message ID
+     *
      * @var string
      */
     protected $id;
 
     /**
      * Job execution status
+     *
      * @var string
      */
-    protected $status;
+    protected $status = JobStatus::RECEIVED;
 
     /**
      * Job data
+     *
      * @var Store
      */
-    protected $data;
+    protected $data = null;
 
     /**
      * Job start time
+     *
      * @var float
      */
     protected $startTime;
 
     /**
      * Job duration
+     *
      * @var float
      */
     protected $duration;
-
-    /**
-     * Prepare job
-     *
-     */
-    public function __construct() {
-        $this->setStatus(JobStatus::RECEIVED);
-        $this->startTime = microtime(true);
-        $this->data = new Store;
-    }
 
     /**
      * Set job id
@@ -122,7 +114,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      * @return array
      */
     public function getData(): array {
-        return $this->data->dump();
+        return $this->data ? $this->data->dump() : [];
     }
 
     /**
@@ -131,6 +123,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      * @param array $data
      */
     public function setData(array $data) {
+        if ($this->data === null) {
+            $this->data = new Store();
+        }
         $this->data->prepare($data);
     }
 
@@ -143,7 +138,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      * @return mixed
      */
     public function get(string $key, $default = null) {
-        return $this->data->get($key);
+        return $this->data ? $this->data->get($key, $default) : $default;
     }
 
     /**
@@ -159,7 +154,13 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      */
     public function teardown() {
-        $this->setStatus(JobStatus::COMPLETE);
+        /**
+         * If the Job doesn't set a JobStatus in the run method, we set the Job as Complete
+         * Otherwise, we respect the run method wishes
+         */
+        if ($this->getStatus() === JobStatus::INPROGRESS) {
+            $this->setStatus(JobStatus::COMPLETE);
+        }
         $this->duration = microtime(true) - $this->startTime;
     }
 
@@ -172,4 +173,10 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
         return $this->duration ? $this->duration : microtime(true) - $this->startTime;
     }
 
+    /**
+     * Set startTime to now
+     */
+    public function setStartTimeNow() {
+        $this->startTime = microtime(true);
+    }
 }

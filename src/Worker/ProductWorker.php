@@ -7,8 +7,8 @@
 
 namespace Vanilla\QueueWorker\Worker;
 
-use Garden\QueueInterop\Job\JobInterface;
-use Garden\QueueInterop\Job\JobStatus;
+use Vanilla\QueueWorker\Job\JobInterface;
+use Vanilla\QueueWorker\Job\JobStatus;
 
 use Vanilla\QueueWorker\Message\Message;
 
@@ -380,7 +380,10 @@ class ProductWorker extends AbstractQueueWorker {
      * Get job for message
      *
      * @param Message $message
+     * @param ContainerInterface $workerDI
      * @return JobInterface
+     * @throws BrokenJobException
+     * @throws UnknownJobException
      */
     public function getJob(Message $message, ContainerInterface $workerDI): JobInterface {
         $payloadType = $message->getPayloadType();
@@ -398,8 +401,10 @@ class ProductWorker extends AbstractQueueWorker {
             throw new BrokenJobException($message, "specified job class does not implement JobInterface");
         }
 
+        $job->setStartTimeNow();
         $job->setID($message->getID());
         $job->setData($message->getBody());
+
         return $job;
     }
 
