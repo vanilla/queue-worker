@@ -18,18 +18,13 @@ use Vanilla\QueueWorker\QueueWorker;
 chdir(dirname($argv[0]));
 $DIR = getcwd();
 
-$paths = [
-    $DIR.'/vendor/autoload.php',
-    dirname(realpath(__FILE__)).'/vendor/autoload.php',
-    dirname(realpath(__FILE__)).'/../../vendor/autoload.php',
-];
-
-foreach ($paths as $path) {
-    if (file_exists($path)) {
-        require_once $path;
-        break;
-    }
+if (!file_exists($DIR.'/vendor/autoload.php') &&
+    file_exists(dirname(realpath(__FILE__)).'/vendor/autoload.php')
+) {
+    $DIR = dirname(realpath(__FILE__));
 }
+
+require_once $DIR.'/vendor/autoload.php';
 
 // Run bootstrap
 QueueWorker::bootstrap($DIR);
