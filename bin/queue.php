@@ -15,12 +15,21 @@ use Garden\Daemon\Daemon;
 use Psr\Log\LogLevel;
 use Vanilla\QueueWorker\QueueWorker;
 
-// Switch to queue root
-chdir(dirname(realpath(__FILE__)));
+chdir(dirname($argv[0]));
 $DIR = getcwd();
 
-// Include the core autoloader.
-require_once $DIR.'/vendor/autoload.php';
+$paths = [
+    $DIR.'/vendor/autoload.php',
+    dirname(realpath(__FILE__)).'/vendor/autoload.php',
+    dirname(realpath(__FILE__)).'/../../vendor/autoload.php',
+];
+
+foreach ($paths as $path) {
+    if (file_exists($path)) {
+        require_once $path;
+        break;
+    }
+}
 
 // Run bootstrap
 QueueWorker::bootstrap($DIR);
