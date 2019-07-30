@@ -45,9 +45,16 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     /**
      * Job data
      *
+     * @var array
+     */
+    protected $body = [];
+
+    /**
+     * Job header
+     *
      * @var Store
      */
-    protected $data = null;
+    protected $headers = [];
 
     /**
      * Job start time
@@ -113,8 +120,8 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      * @return array
      */
-    public function getData(): array {
-        return $this->data ? $this->data->dump() : [];
+    public function getBody(): array {
+        return $this->body;
     }
 
     /**
@@ -122,15 +129,12 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      * @param array $data
      */
-    public function setData(array $data) {
-        if ($this->data === null) {
-            $this->data = new Store();
-        }
-        $this->data->prepare($data);
+    public function setBody(array $data) {
+        $this->body = $data;
     }
 
     /**
-     * Get key from payload
+     * Get key from body
      *
      * @param string $key
      * @param mixed $default
@@ -138,7 +142,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      * @return mixed
      */
     public function get(string $key, $default = null) {
-        return $this->data ? $this->data->get($key, $default) : $default;
+        return valr(trim($key), $this->body, $default);
     }
 
     /**
@@ -179,4 +183,35 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     public function setStartTimeNow() {
         $this->startTime = microtime(true);
     }
+
+    /**
+     * Get key from header
+     *
+     * @param string $key
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function getHeader(string $key, $default = null) {
+        return valr(trim($key), $this->headers, $default);
+    }
+
+    /**
+     * Get job header
+     *
+     * @return array
+     */
+    public function getHeaders(): array {
+        return $this->headers;
+    }
+
+    /**
+     * Set job header
+     *
+     * @param array $headers
+     */
+    public function setHeaders(array $headers) {
+        $this->headers = $headers;
+    }
+
 }

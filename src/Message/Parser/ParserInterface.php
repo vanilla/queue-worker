@@ -30,6 +30,7 @@ interface ParserInterface {
      * Encode message body
      *
      * @param Message $message
+     * @return array
      */
     public function encodeMessage(Message $message);
 

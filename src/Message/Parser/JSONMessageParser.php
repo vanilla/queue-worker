@@ -31,14 +31,14 @@ class JSONMessageParser extends AbstractMessageParser {
         // Decode message body
         $fields['body'] = json_decode($fields['body'], true);
 
-        return new Message($fields['id'], $fields['headers'], $fields['body'], $fields['extras']);
+        return new Message($fields['id'], $fields['headers'], $fields['body']);
     }
 
     /**
      * Encode message for queue insertion
      *
      * @param Message $message
-     * @return string
+     * @return array
      */
     public function encodeMessage(Message $message) {
         $encodedBody = json_encode($message->getBody());

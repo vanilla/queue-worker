@@ -18,33 +18,24 @@ class Message {
 
     /**
      * Message ID
+     *
      * @var string
      */
     protected $id;
 
     /**
      * Message Headers
+     *
      * @var array
      */
     protected $headers;
 
     /**
      * Message Body
+     *
      * @var array
      */
     protected $body;
-
-    /**
-     * Message Extras
-     * @var array
-     */
-    protected $extras;
-
-    /**
-     * Message Queue
-     * @var string
-     */
-    protected $queue;
 
     /**
      * Create message
@@ -52,15 +43,11 @@ class Message {
      * @param string $id
      * @param array $headers
      * @param array $body
-     * @param array $extras optional
      */
-    public function __construct(string $id, array $headers, array $body, array $extras = []) {
+    public function __construct(string $id, array $headers, array $body) {
         $this->id = $id;
         $this->headers = $headers;
         $this->body = $body;
-        $this->extras = $extras;
-
-        $this->queue = $this->headers['queue'] ?? '';
     }
 
     /**
@@ -96,7 +83,7 @@ class Message {
      * @return string
      */
     public function getQueue(): string {
-        return $this->queue;
+        return $this->getHeader('broker_queue', '');
     }
 
     /**
@@ -105,26 +92,17 @@ class Message {
      * @return string|null
      */
     public function getPayloadType(): string {
-        return $this->headers['job'] ?? null;
+        return $this->getHeader('type');
     }
 
     /**
-     * Get extras
-     *
-     * @return array
-     */
-    public function getExtras(): array {
-        return $this->extras;
-    }
-
-    /**
-     * Get extra
+     * Get header
      *
      * @param string $key
-     * @return mixed
+     * @param null $default
+     * @return mixed|null
      */
-    public function getExtra(string $key) {
-        return $this->extras[$key] ?? null;
+    public function getHeader(string $key, $default = null) {
+        return $this->headers[$key] ?? $default;
     }
-
 }

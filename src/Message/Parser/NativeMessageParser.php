@@ -27,7 +27,7 @@ class NativeMessageParser extends AbstractMessageParser {
     public function decodeMessage(array $rawMessage): Message {
         // Extract message features
         $fields = $this->extractMessageFields($rawMessage);
-        return new Message($fields['id'], $fields['headers'], $fields['body'], $fields['extras']);
+        return new Message($fields['id'], $fields['headers'], $fields['body']);
     }
 
     /**

@@ -7,6 +7,7 @@
 
 namespace Vanilla\QueueWorker\Worker;
 
+use Vanilla\QueueWorker\Exception\JobRetryException;
 use Vanilla\QueueWorker\Job\JobInterface;
 use Vanilla\QueueWorker\Job\JobStatus;
 
@@ -33,36 +34,42 @@ class ProductWorker extends AbstractQueueWorker {
 
     /**
      * Worker slot
+     *
      * @var int
      */
     protected $slot;
 
     /**
      * How often to sync with distribution array
+     *
      * @var int
      */
     protected $syncFrequency;
 
     /**
      * Last sync with distribution array
+     *
      * @var int
      */
     protected $lastSync;
 
     /**
      * Number of iterations remaining
+     *
      * @var int
      */
     protected $iterations;
 
     /**
      * Number of per-job retries
+     *
      * @var int
      */
     protected $retries;
 
     /**
      * Slot queues
+     *
      * @var string
      */
     protected $slotQueues;
@@ -108,7 +115,8 @@ class ProductWorker extends AbstractQueueWorker {
     /**
      * Prepare product worker
      *
-     * @param array $workerConfig
+     * @param $workerConfig
+     * @throws \Disque\Connection\ConnectionException
      */
     public function prepareProductWorker($workerConfig) {
         // Prepare sync tracking
@@ -127,7 +135,7 @@ class ProductWorker extends AbstractQueueWorker {
 
         // Announce worker startup
         $this->log(LogLevel::NOTICE, "Product worker started (slot {slot})", [
-            'slot' => $this->slot
+            'slot' => $this->slot,
         ]);
 
         // Connect to queues and cache
@@ -183,7 +191,6 @@ class ProductWorker extends AbstractQueueWorker {
         foreach ($messages as $rawMessage) {
 
             try {
-
                 // Clone DI to prevent pollution
                 $workerContainer = clone $this->container;
                 $workerContainer->setInstance(ContainerInterface::class, $workerContainer);
@@ -192,25 +199,33 @@ class ProductWorker extends AbstractQueueWorker {
                 $this->container->setInstance('@WorkerContainer', $workerContainer);
 
                 // Retrieve and parse message
-
                 $message = $this->parseMessage($rawMessage);
 
                 // Execute message payload
-
                 $job = $this->handleMessage($message);
 
                 // Determine status
-
                 $jobStatus = $job->getStatus();
+
+            } catch (JobRetryException $ex) {
+
+                // Job asked for a retry with a delay
+                $this->log(LogLevel::WARNING, "JobRetryException job [{id}][{job}]: {reason} :: delay: {delay} :: ttl: {ttl}", [
+                    'id' => $message->getID(),
+                    'delay' => $ex->getDelay(),
+                    'ttl' => $ex->getTTL(),
+                    'reason' => $ex->getMessage(),
+                ]);
+                $jobStatus = JobStatus::RETRY;
+                $reason = $ex->getMessage();
 
             } catch (UnknownJobException $ex) {
 
                 // Unable to load job matching payload type
-
                 $this->log(LogLevel::WARNING, "Unknown job [{id}][{job}]: {reason}", [
-                    'id'        => $message->getID(),
-                    'job'       => $ex->getJob(),
-                    'reason'    => $ex->getMessage()
+                    'id' => $message->getID(),
+                    'job' => $ex->getJob(),
+                    'reason' => $ex->getMessage(),
                 ]);
                 $jobStatus = JobStatus::MISMATCH;
                 $reason = $ex->getMessage();
@@ -218,11 +233,10 @@ class ProductWorker extends AbstractQueueWorker {
             } catch (BrokenJobException $ex) {
 
                 // Payload type matches object that is not a valid job
-
                 $this->log(LogLevel::WARNING, "Broken job [{id}][{job}]: {reason}", [
-                    'id'        => $message->getID(),
-                    'job'       => $ex->getJob(),
-                    'reason'    => $ex->getMessage()
+                    'id' => $message->getID(),
+                    'job' => $ex->getJob(),
+                    'reason' => $ex->getMessage(),
                 ]);
                 $jobStatus = JobStatus::INVALID;
                 $reason = $ex->getMessage();
@@ -230,10 +244,9 @@ class ProductWorker extends AbstractQueueWorker {
             } catch (BrokenMessageException $ex) {
 
                 // Message could not be processed within the allotted retry count
-
                 $this->log(LogLevel::WARNING, "Broken message [{id}]: {reason}", [
-                    'id'        => $message->getID(),
-                    'reason'    => $ex->getMessage()
+                    'id' => $message->getID(),
+                    'reason' => $ex->getMessage(),
                 ]);
                 $jobStatus = JobStatus::ABANDONED;
                 $reason = $ex->getMessage();
@@ -241,7 +254,6 @@ class ProductWorker extends AbstractQueueWorker {
             } catch (\Throwable $ex) {
 
                 // PHP error
-
                 $this->logException($ex);
                 $jobStatus = JobStatus::ERROR;
                 $reason = $ex->getMessage();
@@ -260,29 +272,35 @@ class ProductWorker extends AbstractQueueWorker {
             $this->container->setInstance('@WorkerContainer', null);
 
             // Handle end state for jobs
+            if ($jobStatus === JobStatus::RETRY && $ex instanceof JobRetryException) {
+                $this->failedMessage($message, $jobStatus, $reason, $ex);
 
-            if (in_array($jobStatus, [
+                if ($this->fireReturn('retryMessage', [$message, $ex])) {
+                    // Job was re-queue with a new daemonId. We ACK the current one
+                    $this->queue->ackJob($message->getID());
+                } else {
+                    // Call to re-queue fail. NACK failed message after attempt (will retry)
+                    // We could do better in this case.
+                    $this->queue->nack($message->getID());
+                };
+            } elseif (in_array($jobStatus, [
                 JobStatus::INVALID,
                 JobStatus::ABANDONED,
-                JobStatus::ERROR
+                JobStatus::ERROR,
             ])) {
-
                 // ACK failed message (will not retry)
                 $this->queue->ackJob($message->getID());
 
                 // Dead letter handler
                 $this->failedMessage($message, $jobStatus, $reason, $ex);
-
-            } else if ($jobStatus != JobStatus::COMPLETE) {
-
-                // NACK failed message after attempt (will retry)
-                $this->queue->nack($message->getID());
-
             } else {
-
-                // ACK processed message
-                $this->queue->ackJob($message->getID());
-
+                if ($jobStatus != JobStatus::COMPLETE) {
+                    // NACK failed message after attempt (will retry)
+                    $this->queue->nack($message->getID());
+                } else {
+                    // ACK processed message
+                    $this->queue->ackJob($message->getID());
+                }
             }
         }
 
@@ -300,8 +318,8 @@ class ProductWorker extends AbstractQueueWorker {
         // Got a message, so decrement iterations
         $this->iterations--;
 
-        $this->log(LogLevel::DEBUG, "[{slot}] Got message from queue: {queue}", [
-            'slot'  => $this->getSlot()
+        $this->log(LogLevel::DEBUG, "[{slot}] xGot message from queue: {queue}", [
+            'slot' => $this->getSlot(),
         ]);
         $this->log(LogLevel::DEBUG, print_r($rawMessage, true));
 
@@ -317,8 +335,11 @@ class ProductWorker extends AbstractQueueWorker {
      * Handle a queue message
      *
      * @param Message $message
-     * @throws UnknownJobException
      * @return JobInterface
+     * @throws BrokenJobException
+     * @throws BrokenMessageException
+     * @throws JobRetryException
+     * @throws UnknownJobException
      */
     public function handleMessage(Message $message): JobInterface {
 
@@ -331,9 +352,9 @@ class ProductWorker extends AbstractQueueWorker {
         $job = $this->getJob($message, $this->container->get('@WorkerContainer'));
 
         $this->log(LogLevel::NOTICE, "[{slot}][{queue}] Resolved job: {job}", [
-            'slot'  => $this->getSlot(),
+            'slot' => $this->getSlot(),
             'queue' => $message->getQueue(),
-            'job'   => $job->getName()
+            'job' => $job->getName(),
         ]);
 
         $this->fire('gotJob', [$job]);
@@ -350,9 +371,9 @@ class ProductWorker extends AbstractQueueWorker {
         $this->fire('finishedJob', [$job]);
 
         $this->log(LogLevel::NOTICE, "[{slot}] Completed job: {job} ({id})", [
-            'slot'  => $this->getSlot(),
-            'job'   => $job->getName(),
-            'id'    => $message->getID()
+            'slot' => $this->getSlot(),
+            'job' => $job->getName(),
+            'id' => $message->getID(),
         ]);
 
         return $job;
@@ -365,12 +386,15 @@ class ProductWorker extends AbstractQueueWorker {
      * @throws BrokenMessageException
      */
     public function validateMessage(Message $message) {
-        $nacks = $message->getExtra('nacks');
-        $deliveries = $message->getExtra('additional-deliveries');
+        $headers = $message->getHeaders();
+        $nacks = $headers['broker_nacks'] ?? 0;
+        $deliveries = $headers['broker_additional-deliveries'] ?? 0;
+
         $this->log(LogLevel::DEBUG, " message nacked {nacks} times, delivered {deliveries} additional times", [
             'deliveries' => $deliveries,
-            'nacks' => $nacks
+            'nacks' => $nacks,
         ]);
+
         if (($deliveries + $nacks) > $this->retries) {
             throw new BrokenMessageException($message, "too many retries");
         }
@@ -403,7 +427,8 @@ class ProductWorker extends AbstractQueueWorker {
 
         $job->setStartTimeNow();
         $job->setID($message->getID());
-        $job->setData($message->getBody());
+        $job->setBody($message->getBody());
+        $job->setHeaders($message->getHeaders());
 
         return $job;
     }
@@ -417,14 +442,16 @@ class ProductWorker extends AbstractQueueWorker {
      * @param Message $message
      * @param string $level
      * @param string $reason optional
-     * @param \Exception $e
+     * @param \Throwable $e
      */
     public function failedMessage(Message $message, string $level, string $reason = null, \Throwable $e = null) {
-        $this->log(LogLevel::WARNING, "Message could not be handled [{job}]: {reason}", [
-            'job'       => $message->getPayloadType(),
-            'level'     => $level,
-            'reason'    => $reason
-        ]);
+        if (!$e instanceof JobRetryException) {
+            $this->log(LogLevel::WARNING, "Message could not be handled [{job}]: {reason}", [
+                'job' => $message->getPayloadType(),
+                'level' => $level,
+                'reason' => $reason,
+            ]);
+        }
 
         $this->fire('failedMessage', [$message, $level, $reason, $e]);
     }
@@ -444,15 +471,15 @@ class ProductWorker extends AbstractQueueWorker {
             'levelString' => ucfirst($level),
             'message' => $ex->getMessage(),
             'file' => $ex->getFile(),
-            'line' => $ex->getLine()
+            'line' => $ex->getLine(),
         ]);
 
         // Fire hookable log event
         $this->fire('fatalError', [[
-            'level'     => $level,
-            'message'   => $ex->getMessage(),
-            'file'      => $ex->getFile(),
-            'line'      => $ex->getLine()
+            'level' => $level,
+            'message' => $ex->getMessage(),
+            'file' => $ex->getFile(),
+            'line' => $ex->getLine(),
         ]]);
     }
 
@@ -473,7 +500,7 @@ class ProductWorker extends AbstractQueueWorker {
         $commandArgs[] = [
             'nohang' => true,
             'withcounters' => true,
-            'timeout' => 0
+            'timeout' => 0,
         ];
 
         // Get job from slot queues

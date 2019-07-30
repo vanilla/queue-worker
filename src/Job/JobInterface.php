@@ -7,6 +7,8 @@
 
 namespace Vanilla\QueueWorker\Job;
 
+use Vanilla\QueueWorker\Exception\JobRetryException;
+
 /**
  * Queue job interface.
  *
@@ -51,14 +53,37 @@ interface JobInterface {
      *
      * @return array
      */
-    public function getData(): array;
+    public function getBody(): array;
 
     /**
      * Set job data
      *
      * @param array $data
      */
-    public function setData(array $data);
+    public function setBody(array $data);
+
+    /**
+     * Get job header
+     *
+     * @param $key
+     * @param $default
+     * @return mixed
+     */
+    public function getHeader(string $key, $default);
+
+    /**
+     * Get job headers
+     *
+     * @return array
+     */
+    public function getHeaders(): array;
+
+    /**
+     * Set job header
+     *
+     * @param array $headers
+     */
+    public function setHeaders(array $headers);
 
     /**
      * Get message handling status
@@ -87,6 +112,8 @@ interface JobInterface {
 
     /**
      * Run job payload
+     *
+     * @throws JobRetryException
      */
     public function run();
 
