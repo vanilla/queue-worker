@@ -25,7 +25,7 @@
         "bin/queue.php"
     ],
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.2",
         "kaecyra/app-common": "^1.0",
         "vanilla/garden-container": "^2.0",
         "vanilla/garden-daemon": "^1.1",
