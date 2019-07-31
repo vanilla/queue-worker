@@ -89,10 +89,10 @@ class Message {
     /**
      * Get job payload type
      *
-     * @return string|null
+     * @return string
      */
     public function getPayloadType(): string {
-        return $this->getHeader('type');
+        return $this->getHeader('type', 'N/A');
     }
 
     /**
