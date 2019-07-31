@@ -16,7 +16,10 @@ class JobStatus {
 
     const RECEIVED = 'received';
     const INPROGRESS = 'inprogress';
+
     const RETRY = 'retry';
+    const RETRY_FAILED = 'retry_failed';
+
     const COMPLETE = 'complete';
 
     const INVALID = 'invalid';
@@ -24,4 +27,6 @@ class JobStatus {
     const MISMATCH = 'mismatch';
     const ABANDONED = 'abandoned';
     const ERROR = 'error';
+
+    const UNKNOWN = "unknown";
 }
