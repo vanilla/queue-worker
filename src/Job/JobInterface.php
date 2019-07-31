@@ -69,7 +69,7 @@ interface JobInterface {
      * @param $default
      * @return mixed
      */
-    public function getHeader(string $key, $default);
+    public function getHeader(string $key, $default = null);
 
     /**
      * Get job headers
