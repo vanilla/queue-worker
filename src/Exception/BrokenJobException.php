@@ -7,6 +7,8 @@
 
 namespace Vanilla\QueueWorker\Exception;
 
+use Vanilla\QueueWorker\Job\JobStatus;
+
 /**
  * Message Exception: BrokenJob
  *
@@ -15,6 +17,7 @@ namespace Vanilla\QueueWorker\Exception;
  * @version 1.0
  */
 class BrokenJobException extends QueueMessageException {
+    protected const JOB_STATUS = JobStatus::INVALID;
 
     /**
      * Get job payload name

@@ -7,6 +7,8 @@
 
 namespace Vanilla\QueueWorker\Exception;
 
+use Vanilla\QueueWorker\Job\JobStatus;
+
 /**
  * Message Exception: BrokenMessage
  *
@@ -15,5 +17,6 @@ namespace Vanilla\QueueWorker\Exception;
  * @version 1.0
  */
 class BrokenMessageException extends QueueMessageException {
+    protected const JOB_STATUS = JobStatus::MISMATCH;
 
 }

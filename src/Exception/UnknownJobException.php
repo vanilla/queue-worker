@@ -7,6 +7,8 @@
 
 namespace Vanilla\QueueWorker\Exception;
 
+use Vanilla\QueueWorker\Job\JobStatus;
+
 /**
  * Message Exception: UnknownJob
  *
@@ -15,6 +17,7 @@ namespace Vanilla\QueueWorker\Exception;
  * @version 1.0
  */
 class UnknownJobException extends QueueMessageException {
+    protected const JOB_STATUS = JobStatus::MISMATCH;
 
     /**
      * Get job payload name
@@ -22,7 +25,6 @@ class UnknownJobException extends QueueMessageException {
      * @return string
      */
     public function getJob(): string {
-        return $this->getQueueMessage()->getPayloadType();
+        return $this->getQueueMessage()->getPayloadType() ?? "N/A";
     }
-
 }

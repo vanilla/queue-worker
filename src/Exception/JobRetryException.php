@@ -1,44 +1,38 @@
 <?php
 
 /**
- * Vanilla queue extension: ClassMapperAddon
- *
- * @author Eduardo Garcia Julia <eduardo.garciajulia@vanillaforums.com>
- * @package queue-worker
- * @since 1.0
+ * @license Proprietary
+ * @copyright 2009-2016 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Exception;
 
-use Exception;
+use Vanilla\QueueWorker\Job\JobStatus;
 
 /**
  * Class JobRetryException.
  */
-class JobRetryException extends Exception {
+class JobRetryException extends QueueMessageException {
+    protected const JOB_STATUS = JobStatus::ABANDONED;
+
     /* @var int */
     private $delay;
 
-    /* @var int|null */
-    private $ttl;
-
-    public function __construct(string $reason, int $delay, int $ttl = null) {
-        parent::__construct($reason.". Job will be scheduled to retry in $delay seconds");
-        $this->delay = $delay;
-        $this->tll = $ttl;
-    }
-
     /**
-     * @return int
+     * JobRetryException constructor.
+     *
+     * @param int|null $delay
+     * @param string|null $reason
      */
-    public function getDelay(): int {
-        return $this->delay;
+    public function __construct(int $delay = null, string $reason = null) {
+        parent::__construct(null, $reason ?? "");
+        $this->delay = $delay;
     }
 
     /**
      * @return int|null
      */
-    public function getTTL(): ?int {
-        return $this->ttl;
+    public function getDelay(): ?int {
+        return $this->delay;
     }
 }
