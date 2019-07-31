@@ -43,7 +43,7 @@ use Psr\Log\LogLevel;
  *
  * @author Tim Gunter <tim@vanillaforums.com>
  * @package queue-worker
- * @version 0.1
+ * @version 0.2
  */
 class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInterface {
 
@@ -95,12 +95,6 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
 
     /**
      * Queue worker bootstrap
-     *
-     * @license Proprietary
-     * @copyright 2009-2016 Vanilla Forums Inc.
-     * @author Tim Gunter <tim@vanillaforums.com>
-     * @package queue-worker
-     * @version 0.1.0
      */
     public static function bootstrap($dir) {
         global $container, $logger;
