@@ -10,7 +10,6 @@ namespace Vanilla\QueueWorker\Job;
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
 use Kaecyra\AppCommon\Log\LoggerBoilerTrait;
-use Kaecyra\AppCommon\Store;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -52,7 +51,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     /**
      * Job header
      *
-     * @var Store
+     * @var array
      */
     protected $headers = [];
 
