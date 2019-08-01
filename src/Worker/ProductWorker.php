@@ -198,6 +198,7 @@ class ProductWorker extends AbstractQueueWorker {
                         // The Api could respond that the Job is expired/exhausted and the retry was denied
                         // This could happens because you reached the TTL of the Job or a TTL hard-limit
                         // The catch allow us to proceed with the ack of the job.
+                        $jobStatus = JobStatus::RETRY_FAILED;
                     } catch (\Throwable $t) {
                         $jobStatus = JobStatus::RETRY_FAILED;
                         $ack = false;
