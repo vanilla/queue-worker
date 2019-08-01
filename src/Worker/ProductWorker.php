@@ -90,6 +90,7 @@ class ProductWorker extends AbstractQueueWorker {
                 $this->slotQueues = $update;
                 $this->fire('updatedQueues', [$this]);
             }
+            $this->lastSync = time();
         }
     }
 
