@@ -53,6 +53,6 @@ class QueueMessageException extends \Exception {
 
 
     public function getStatus() {
-        return self::JOB_STATUS;
+        return static::JOB_STATUS;
     }
 }
