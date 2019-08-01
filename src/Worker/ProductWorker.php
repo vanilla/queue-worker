@@ -303,7 +303,7 @@ class ProductWorker extends AbstractQueueWorker {
 
         // Check that the specified job exists
         if (!$workerDI->has($payloadType)) {
-            throw new UnknownJobException($message, "specified job class cannot be found");
+            throw new UnknownJobException($message, "specified job class cannot be found: ".$payloadType);
         }
 
         // Create job instance
@@ -311,7 +311,7 @@ class ProductWorker extends AbstractQueueWorker {
 
         // Check that the job is legal
         if (!$job instanceof JobInterface) {
-            throw new BrokenJobException($message, "specified job class does not implement JobInterface");
+            throw new BrokenJobException($message, "specified job class does not implement JobInterface:".$payloadType);
         }
 
         $job->setStartTimeNow();
