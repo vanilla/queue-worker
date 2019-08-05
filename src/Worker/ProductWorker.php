@@ -210,10 +210,6 @@ class ProductWorker extends AbstractQueueWorker
                 $message = $this->getParser()->decodeMessage($rawMessage);
                 $this->fireEvent(new GotMessageProductWorkerEvent($this, $message));
 
-                // Ack the message
-                $this->getDisqueClient()->ackJob($message->getID());
-                $this->fireEvent(new AckedMessageProductWorkerEvent($this, $message));
-
                 // Validate the message
                 $this->fireEvent(new ValidateMessageProductWorkerEvent($this, $message));
 
@@ -229,13 +225,23 @@ class ProductWorker extends AbstractQueueWorker
                 // Announce executedJob
                 $this->fireEvent(new ExecutedJobProductWorkerEvent($this, $job));
 
+                // Ack the message
+                $this->getDisqueClient()->ackJob($message->getBrokerId());
+                $this->fireEvent(new AckedMessageProductWorkerEvent($this, $message));
+
             } catch (Throwable $ex) {
                 $isTrueFail = true;
 
                 if ($ex instanceof JobRetryException) {
                     try {
+                        // Announce requeueJob
                         $this->fireEvent(new RequeueJobProductWorkerEvent($this, $job, $ex));
+                        // Announce executedJob
                         $this->fireEvent(new ExecutedJobProductWorkerEvent($this, $job));
+                        // Ack the message
+                        $this->getDisqueClient()->ackJob($message->getBrokerId());
+                        $this->fireEvent(new AckedMessageProductWorkerEvent($this, $message));
+
                         $isTrueFail = false;
                     } catch (Throwable $requeueException) {
                         // The Api could respond that the Job is expired/exhausted and the retry was denied
@@ -250,7 +256,7 @@ class ProductWorker extends AbstractQueueWorker
                     }
 
                     // Nack the message
-                    $this->getDisqueClient()->ackJob($message->getID());
+                    $this->getDisqueClient()->nack($message->getBrokerId());
                     $this->fireEvent(new NackedMessageProductWorkerEvent($this, $message));
 
                     $this->fireEvent(new FailedIterationProductWorkerEvent($this, $ex));
@@ -280,7 +286,7 @@ class ProductWorker extends AbstractQueueWorker
          */
         $workerDI = $this->container->get('@WorkerContainer');
 
-        $payloadType = $message->getPayloadType();
+        $payloadType = $message->getType();
 
         // Check that the specified job exists
         if (!$workerDI->has($payloadType)) {

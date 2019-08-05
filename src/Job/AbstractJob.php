@@ -17,7 +17,7 @@ use Vanilla\QueueWorker\Message\Message;
 use Vanilla\QueueWorker\Worker\WorkerStatus;
 
 /**
- * Queue job interface.
+ * AbstractJob interface.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
  */
@@ -40,38 +40,19 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     protected $status;
 
     /**
-     * @throws JobRetryException
+     * @param \Vanilla\QueueWorker\Message\Message $message
      */
-    abstract public function run();
-
-    /**
-     * Get job ID
-     *
-     * @return string
-     */
-    public function getID(): string
+    public function setMessage(Message $message)
     {
-        return $this->getMessage()->getID();
+        $this->message = $message;
     }
 
     /**
-     * Get job name
-     *
-     * @return string
+     * @return \Vanilla\QueueWorker\Message\Message
      */
-    public function getName(): string
+    public function getMessage(): Message
     {
-        return static::class;
-    }
-
-    /**
-     * Get message handling status
-     *
-     * @return WorkerStatus
-     */
-    public function getStatus(): WorkerStatus
-    {
-        return $this->status;
+        return ($this->message === null) ? new Message([], []) : $this->message;
     }
 
     /**
@@ -85,7 +66,37 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     }
 
     /**
-     * Get job data
+     * Get message handling status
+     *
+     * @return WorkerStatus
+     */
+    public function getStatus(): WorkerStatus
+    {
+        return ($this->status === null) ? WorkerStatus::unknown() : $this->status;
+    }
+
+    /**
+     * Get broker id
+     *
+     * @return string
+     */
+    public function getBrokerId(): string
+    {
+        return $this->getMessage()->getBrokerId();
+    }
+
+    /**
+     * Get job name
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return static::class;
+    }
+
+    /**
+     * Get message body
      *
      * @return array
      */
@@ -95,16 +106,39 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     }
 
     /**
-     * Get key from body
+     * Get key from message body
      *
      * @param string $key
      * @param mixed $default
      *
      * @return mixed
      */
-    public function get(string $key, $default = null)
+    public function getBodyKey(string $key, $default = null)
     {
         return $this->getMessage()->getBodyKey($key, $default);
+    }
+
+    /**
+     * Get key from message header
+     *
+     * @param string $key
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function getHeaderKey(string $key, $default = null)
+    {
+        return $this->getMessage()->getHeaderKey($key, $default);
+    }
+
+    /**
+     * Get message header
+     *
+     * @return array
+     */
+    public function getHeader(): array
+    {
+        return $this->getMessage()->getHeader();
     }
 
     /**
@@ -123,7 +157,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     public function teardown()
     {
         /**
-         * If the Job doesn't set a JobStatus in the run method, we set the Job as Complete
+         * If the Job doesn't set a WorkerStatus in the run method, we set the WorkerStatus as Complete
          * Otherwise, we respect the run method wishes
          */
         if ($this->getStatus()->is(WorkerStatus::progress())) {
@@ -132,41 +166,7 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
     }
 
     /**
-     * Get key from header
-     *
-     * @param string $key
-     * @param mixed $default
-     *
-     * @return mixed
+     * @throws JobRetryException
      */
-    public function getHeader(string $key, $default = null)
-    {
-        return $this->getMessage()->getHeaderKey($key, $default);
-    }
-
-    /**
-     * Get job header
-     *
-     * @return array
-     */
-    public function getHeaders(): array
-    {
-        return $this->getMessage()->getHeaders();
-    }
-
-    /**
-     * @param \Vanilla\QueueWorker\Message\Message $message
-     */
-    public function setMessage(Message $message)
-    {
-        $this->message = $message;
-    }
-
-    /**
-     * @return \Vanilla\QueueWorker\Message\Message
-     */
-    public function getMessage(): Message
-    {
-        return $this->message;
-    }
+    abstract public function run();
 }

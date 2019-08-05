@@ -36,10 +36,10 @@ class NativeMessageParser implements ParserInterface
             }
         }
 
-        $id = $rawMessage['id'];
         $body = json_decode($rawMessage['body'], true);
 
         $headers = [
+            'broker_id' => $rawMessage['queue'],
             'broker_queue' => $rawMessage['queue'],
             'broker_nacks' => $rawMessage['nacks'],
             'broker_additional-deliveries' => $rawMessage['additional-deliveries'],
@@ -52,6 +52,6 @@ class NativeMessageParser implements ParserInterface
             $body = $body[1];
         }
 
-        return new Message($id, $headers, $body);
+        return new Message($headers, $body);
     }
 }

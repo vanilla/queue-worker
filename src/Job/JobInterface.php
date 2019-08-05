@@ -21,11 +21,18 @@ use Vanilla\QueueWorker\Worker\WorkerStatus;
 interface JobInterface
 {
     /**
-     * Get job ID
+     * Set message handling status
      *
-     * @return string
+     * @param WorkerStatus $status
      */
-    public function getID(): string;
+    public function setStatus(WorkerStatus $status);
+
+    /**
+     * Get message handling status
+     *
+     * @return WorkerStatus
+     */
+    public function getStatus(): WorkerStatus;
 
     /**
      * Set message
@@ -41,11 +48,11 @@ interface JobInterface
     public function getMessage(): Message;
 
     /**
-     * Get the job name
+     * Get job data
      *
-     * @return string
+     * @return array
      */
-    public function getName(): string;
+    public function getBody(): array;
 
     /**
      * Get job data by key
@@ -55,14 +62,14 @@ interface JobInterface
      *
      * @return mixed
      */
-    public function get(string $key, $default = null);
+    public function getBodyKey(string $key, $default = null);
 
     /**
-     * Get job data
+     * Get job headers
      *
      * @return array
      */
-    public function getBody(): array;
+    public function getHeader(): array;
 
     /**
      * Get job header
@@ -72,28 +79,21 @@ interface JobInterface
      *
      * @return mixed
      */
-    public function getHeader(string $key, $default = null);
+    public function getHeaderKey(string $key, $default = null);
 
     /**
-     * Get job headers
+     * Get broker id
      *
-     * @return array
+     * @return string
      */
-    public function getHeaders(): array;
+    public function getBrokerId(): string;
 
     /**
-     * Get message handling status
+     * Get the job name
      *
-     * @return WorkerStatus
+     * @return string
      */
-    public function getStatus(): WorkerStatus;
-
-    /**
-     * Set message handling status
-     *
-     * @param WorkerStatus $status
-     */
-    public function setStatus(WorkerStatus $status);
+    public function getName(): string;
 
     /**
      * Run job payload
