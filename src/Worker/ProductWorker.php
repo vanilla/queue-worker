@@ -330,9 +330,10 @@ class ProductWorker extends AbstractQueueWorker
         // Prepare the getJob command with variadic queue parameters
         $commandArgs = $slotQueues;
         $commandArgs[] = [
+            'nohang' => true,
             'count' => 1,
             'withcounters' => true,
-            'timeout' => 1,
+            'timeout' => 0,
         ];
 
         // Get job from slot queues
