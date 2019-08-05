@@ -2,7 +2,7 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2018 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Job;
@@ -10,81 +10,48 @@ namespace Vanilla\QueueWorker\Job;
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
 use Kaecyra\AppCommon\Log\LoggerBoilerTrait;
-
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Vanilla\QueueWorker\Exception\JobRetryException;
+use Vanilla\QueueWorker\Message\Message;
+use Vanilla\QueueWorker\Worker\WorkerStatus;
 
 /**
  * Queue job interface.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @version 1.0
  */
-abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventAwareInterface {
-
+abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventAwareInterface
+{
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
     use EventAwareTrait;
 
     /**
-     * Job message ID
-     *
-     * @var string
+     * @var Message
      */
-    protected $id;
+    protected $message;
 
     /**
      * Job execution status
      *
-     * @var string
+     * @var WorkerStatus
      */
-    protected $status = JobStatus::RECEIVED;
+    protected $status;
 
     /**
-     * Job data
-     *
-     * @var array
+     * @throws JobRetryException
      */
-    protected $body = [];
-
-    /**
-     * Job header
-     *
-     * @var array
-     */
-    protected $headers = [];
-
-    /**
-     * Job start time
-     *
-     * @var float
-     */
-    protected $startTime;
-
-    /**
-     * Job duration
-     *
-     * @var float
-     */
-    protected $duration;
-
-    /**
-     * Set job id
-     *
-     * @param string $id
-     */
-    public function setID(string $id) {
-        $this->id = $id;
-    }
+    abstract public function run();
 
     /**
      * Get job ID
      *
      * @return string
      */
-    public function getID(): string {
-        return $this->id;
+    public function getID(): string
+    {
+        return $this->getMessage()->getID();
     }
 
     /**
@@ -92,25 +59,28 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      * @return string
      */
-    public function getName(): string {
+    public function getName(): string
+    {
         return static::class;
     }
 
     /**
      * Get message handling status
      *
-     * @return string
+     * @return WorkerStatus
      */
-    public function getStatus(): string {
+    public function getStatus(): WorkerStatus
+    {
         return $this->status;
     }
 
     /**
      * Set message handling status
      *
-     * @param string $status
+     * @param WorkerStatus $status
      */
-    public function setStatus(string $status) {
+    public function setStatus(WorkerStatus $status)
+    {
         $this->status = $status;
     }
 
@@ -119,17 +89,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      * @return array
      */
-    public function getBody(): array {
-        return $this->body;
-    }
-
-    /**
-     * Set job data
-     *
-     * @param array $data
-     */
-    public function setBody(array $data) {
-        $this->body = $data;
+    public function getBody(): array
+    {
+        return $this->getMessage()->getBody();
     }
 
     /**
@@ -140,47 +102,33 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      * @return mixed
      */
-    public function get(string $key, $default = null) {
-        return valr(trim($key), $this->body, $default);
+    public function get(string $key, $default = null)
+    {
+        return $this->getMessage()->getBodyKey($key, $default);
     }
 
     /**
      * NOOP Setup
      *
      */
-    public function setup() {
-        $this->setStatus(JobStatus::INPROGRESS);
+    public function setup()
+    {
+        $this->setStatus(WorkerStatus::progress());
     }
 
     /**
      * NOOP Teardown
      *
      */
-    public function teardown() {
+    public function teardown()
+    {
         /**
          * If the Job doesn't set a JobStatus in the run method, we set the Job as Complete
          * Otherwise, we respect the run method wishes
          */
-        if ($this->getStatus() === JobStatus::INPROGRESS) {
-            $this->setStatus(JobStatus::COMPLETE);
+        if ($this->getStatus()->is(WorkerStatus::progress())) {
+            $this->setStatus(WorkerStatus::complete());
         }
-        $this->duration = microtime(true) - $this->startTime;
-    }
-
-    /**
-     * Get execution time
-     *
-     * @return float
-     */
-    public function getDuration(): float {
-        return $this->duration ? $this->duration : microtime(true) - $this->startTime;
-    }
-
-    /**
-     * Set startTime to now
-     */
-    public function setStartTimeNow() {
-        $this->startTime = microtime(true);
     }
 
     /**
@@ -191,8 +139,9 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      * @return mixed
      */
-    public function getHeader(string $key, $default = null) {
-        return valr(trim($key), $this->headers, $default);
+    public function getHeader(string $key, $default = null)
+    {
+        return $this->getMessage()->getHeaderKey($key, $default);
     }
 
     /**
@@ -200,17 +149,24 @@ abstract class AbstractJob implements JobInterface, LoggerAwareInterface, EventA
      *
      * @return array
      */
-    public function getHeaders(): array {
-        return $this->headers;
+    public function getHeaders(): array
+    {
+        return $this->getMessage()->getHeaders();
     }
 
     /**
-     * Set job header
-     *
-     * @param array $headers
+     * @param \Vanilla\QueueWorker\Message\Message $message
      */
-    public function setHeaders(array $headers) {
-        $this->headers = $headers;
+    public function setMessage(Message $message)
+    {
+        $this->message = $message;
     }
 
+    /**
+     * @return \Vanilla\QueueWorker\Message\Message
+     */
+    public function getMessage(): Message
+    {
+        return $this->message;
+    }
 }

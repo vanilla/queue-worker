@@ -4,11 +4,10 @@
 /**
  * Queue-Worker is an asynchronous task running daemon.
  *
- * @license MIT
- * @copyright 2009-2017 Vanilla Forums Inc.
+ * @license Proprietary
+ * @copyright 2009-2019 Vanilla Forums Inc.
+ *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @version 1.0
  */
 
 use Garden\Daemon\Daemon;
@@ -26,12 +25,11 @@ if (!file_exists($DIR.'/vendor/autoload.php') &&
 
 require_once $DIR.'/vendor/autoload.php';
 
-// Run bootstrap
-QueueWorker::bootstrap($DIR);
-
-$exitCode = 0;
 try {
+    // Run bootstrap
+    QueueWorker::bootstrap($DIR);
 
+    /** @var Daemon $daemon */
     $daemon = $container->get(Daemon::class);
     $exitCode = $daemon->attach($argv);
 
@@ -48,7 +46,7 @@ try {
         $logger->log(LogLevel::ERROR, $ex->getMessage());
     }
 
-} catch (Exception $ex) {
+} catch (Throwable $ex) {
     $exitCode = 1;
 
     if ($ex->getFile()) {

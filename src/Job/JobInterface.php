@@ -1,13 +1,15 @@
 <?php
 
 /**
- * @copyright 2009-2018 Vanilla Forums Inc.
- * @license MIT
+ * @license Proprietary
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Job;
 
 use Vanilla\QueueWorker\Exception\JobRetryException;
+use Vanilla\QueueWorker\Message\Message;
+use Vanilla\QueueWorker\Worker\WorkerStatus;
 
 /**
  * Queue job interface.
@@ -16,8 +18,8 @@ use Vanilla\QueueWorker\Exception\JobRetryException;
  *
  * @author Tim Gunter <tim@vanillaforums.com>
  */
-interface JobInterface {
-
+interface JobInterface
+{
     /**
      * Get job ID
      *
@@ -26,11 +28,17 @@ interface JobInterface {
     public function getID(): string;
 
     /**
-     * Set job ID
+     * Set message
      *
-     * @param string $id
+     * @param \Vanilla\QueueWorker\Message\Message $message
+     *
      */
-    public function setID(string $id);
+    public function setMessage(Message $message);
+
+    /**
+     * @return \Vanilla\QueueWorker\Message\Message
+     */
+    public function getMessage(): Message;
 
     /**
      * Get the job name
@@ -44,6 +52,7 @@ interface JobInterface {
      *
      * @param string $key
      * @param mixed $default
+     *
      * @return mixed
      */
     public function get(string $key, $default = null);
@@ -56,17 +65,11 @@ interface JobInterface {
     public function getBody(): array;
 
     /**
-     * Set job data
-     *
-     * @param array $data
-     */
-    public function setBody(array $data);
-
-    /**
      * Get job header
      *
      * @param $key
      * @param $default
+     *
      * @return mixed
      */
     public function getHeader(string $key, $default = null);
@@ -79,36 +82,18 @@ interface JobInterface {
     public function getHeaders(): array;
 
     /**
-     * Set job header
-     *
-     * @param array $headers
-     */
-    public function setHeaders(array $headers);
-
-    /**
      * Get message handling status
      *
-     * @return string
+     * @return WorkerStatus
      */
-    public function getStatus(): string;
+    public function getStatus(): WorkerStatus;
 
     /**
      * Set message handling status
      *
-     * @param string $status
+     * @param WorkerStatus $status
      */
-    public function setStatus(string $status);
-
-    /**
-     * Set startTime to now
-     */
-    public function setStartTimeNow();
-
-    /**
-     * Return execution time
-     * @return float
-     */
-    public function getDuration();
+    public function setStatus(WorkerStatus $status);
 
     /**
      * Run job payload

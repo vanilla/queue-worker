@@ -2,20 +2,20 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Addon;
+
+use Exception;
 
 /**
  * Addon marker object
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @since 1.0
  */
-class Addon {
-
+class Addon
+{
     /**
      * Addon folder
      * @var string
@@ -41,11 +41,14 @@ class Addon {
     protected $special;
 
     /**
-     * Create addon marker instance
+     * Addon constructor.
      *
-     * @param string $definitionFile
+     * @param $definitionFile
+     *
+     * @throws \Exception
      */
-    public function __construct($definitionFile) {
+    public function __construct($definitionFile)
+    {
         $this->dir = dirname($definitionFile);
         $this->special = [];
 
@@ -60,23 +63,26 @@ class Addon {
      * Scan an addon definition file
      *
      * @param string $definitionFile path to addon definition file
-     * @return boolean
+     *
+     * @return array
+     * @throws \Exception
      */
-    protected function scanAddonDefinition($definitionFile) {
+    protected function scanAddonDefinition($definitionFile)
+    {
         if (!file_exists($definitionFile)) {
-            throw new \Exception("missing definition file");
+            throw new Exception("missing definition file");
         }
 
         // Prepare addon info array
         $definition = [
-            'path'      => dirname($definitionFile),
-            'requires'  => []
+            'path' => dirname($definitionFile),
+            'requires' => [],
         ];
 
         // Read from definition file
         $definitionData = json_decode(file_get_contents($definitionFile), true);
         if (!$definitionData) {
-            throw new \Exception("failed to parse definition file");
+            throw new Exception("failed to parse definition file");
         }
         $definition = array_merge_recursive($definition, $definitionData);
 
@@ -87,7 +93,7 @@ class Addon {
         $requirementCheck = array_intersect_key($definition, $requiredMatch);
         if (count($requirementCheck) < count($requiredKeys)) {
             $missing = array_diff_key($requiredMatch, $definition);
-            throw new \Exception("missing definition fields (".implode(',',array_keys($missing)).")");
+            throw new Exception("missing definition fields (".implode(',', array_keys($missing)).")");
         }
 
         return $definition;
@@ -98,10 +104,11 @@ class Addon {
      *
      * @param string $dir path to scan
      * @param int $depth how deep to scan
+     *
      * @return array an array of subpaths.
      */
-    protected function scanClasses($dir, $depth = 2) {
-
+    protected function scanClasses($dir, $depth = 2)
+    {
         // Don't recurse if we've hit out depth limit
         if ($depth < 0) {
             return [];
@@ -111,15 +118,15 @@ class Addon {
 
         $classes = [];
         foreach ($paths as $path) {
-            if (in_array($path, ['.','..'])) {
+            if (in_array($path, ['.', '..'])) {
                 continue;
             }
 
-            $full = paths($dir,$path);
+            $full = paths($dir, $path);
 
             if (is_dir($full)) {
                 if ($depth > 0) {
-                    $classes = array_merge($classes, $this->scanClasses($full, $depth-1));
+                    $classes = array_merge($classes, $this->scanClasses($full, $depth - 1));
                 }
             } else {
 
@@ -163,11 +170,13 @@ class Addon {
      * Inspect a file and return the classes and namespaces that it defines
      *
      * @param string $path Path to file.
+     *
      * @return array Returns an empty array if no classes are found or an array with namespaces and
      * classes found in the file.
      * @see http://stackoverflow.com/a/11114724/1984219
      */
-    private function scanFile($path) {
+    private function scanFile($path)
+    {
         $classes = $nsPos = $final = [];
         $foundNamespace = false;
         $ii = 0;
@@ -181,9 +190,8 @@ class Addon {
 
         $php_code = file_get_contents($path);
         $tokens = token_get_all($php_code);
-//        $count = count($tokens);
 
-        foreach ($tokens as $i => $token) { //} ($i = 0; $i < $count; $i++) {
+        foreach ($tokens as $i => $token) {
             if (!$foundNamespace && $token[0] == T_NAMESPACE) {
                 $nsPos[$ii]['start'] = $i;
                 $foundNamespace = true;
@@ -193,14 +201,14 @@ class Addon {
                 $foundNamespace = false;
             } elseif ($i - 2 >= 0 && $tokens[$i - 2][0] == T_CLASS && $tokens[$i - 1][0] == T_WHITESPACE && $token[0] == T_STRING) {
                 if ($i - 4 >= 0 && $tokens[$i - 4][0] == T_ABSTRACT) {
-                    $classes[$ii][] = array('name' => $token[1], 'type' => 'ABSTRACT CLASS');
+                    $classes[$ii][] = ['name' => $token[1], 'type' => 'ABSTRACT CLASS'];
                 } else {
-                    $classes[$ii][] = array('name' => $token[1], 'type' => 'CLASS');
+                    $classes[$ii][] = ['name' => $token[1], 'type' => 'CLASS'];
                 }
             } elseif ($i - 2 >= 0 && $tokens[$i - 2][0] == T_INTERFACE && $tokens[$i - 1][0] == T_WHITESPACE && $token[0] == T_STRING) {
-                $classes[$ii][] = array('name' => $token[1], 'type' => 'INTERFACE');
+                $classes[$ii][] = ['name' => $token[1], 'type' => 'INTERFACE'];
             } elseif ($i - 2 >= 0 && $tokens[$i - 2][0] == T_TRAIT && $tokens[$i - 1][0] == T_WHITESPACE && $token[0] == T_STRING) {
-                $classes[$ii][] = array('name' => $token[1], 'type' => 'TRAIT');
+                $classes[$ii][] = ['name' => $token[1], 'type' => 'TRAIT'];
             }
         }
         error_reporting($er);
@@ -216,10 +224,11 @@ class Addon {
                 }
 
                 $ns = trim($ns);
-                $final[$k] = array('namespace' => $ns, 'classes' => $classes[$k + 1]);
+                $final[$k] = ['namespace' => $ns, 'classes' => $classes[$k + 1]];
             }
             $classes = $final;
         }
+
         return $classes;
     }
 
@@ -228,7 +237,8 @@ class Addon {
      *
      * @param string $class
      */
-    public function autoload($class) {
+    public function autoload($class)
+    {
         $classKey = strtolower($class);
 
         if (isset($this->classes[$classKey])) {
@@ -241,9 +251,11 @@ class Addon {
      * Get value from definition array
      *
      * @param string $key optional
+     *
      * @return mixed
      */
-    public function getInfo($key) {
+    public function getInfo($key)
+    {
         return $this->info[$key] ?? null;
     }
 
@@ -252,7 +264,8 @@ class Addon {
      *
      * @return string
      */
-    public function getName() {
+    public function getName()
+    {
         return $this->info['name'];
     }
 
@@ -261,7 +274,8 @@ class Addon {
      *
      * @return string
      */
-    public function getPath() {
+    public function getPath()
+    {
         return $this->info['path'];
     }
 
@@ -270,7 +284,8 @@ class Addon {
      *
      * @return array
      */
-    public function getClasses() {
+    public function getClasses()
+    {
         return $this->classes;
     }
 
@@ -279,7 +294,8 @@ class Addon {
      *
      * @return string
      */
-    public function getAddonClass() {
+    public function getAddonClass()
+    {
         return $this->special['addon'] ?? null;
     }
 

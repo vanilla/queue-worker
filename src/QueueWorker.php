@@ -2,37 +2,35 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker;
 
-use Vanilla\QueueWorker\Allocation\AllocationStrategyInterface;
-use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
-use Vanilla\QueueWorker\Addon\AddonManager;
-use Vanilla\QueueWorker\Message\Parser\ParserInterface;
-use Vanilla\QueueWorker\Error\FatalErrorHandler;
-use Vanilla\QueueWorker\Error\LogErrorHandler;
-
-use Garden\Daemon\Daemon;
-use Garden\Daemon\AppInterface;
-use Garden\Daemon\ErrorHandler;
+use Garden\Cli\Args;
+use Garden\Cli\Cli;
 use Garden\Container\Container;
 use Garden\Container\Reference;
-use Garden\Cli\Cli;
-use Garden\Cli\Args;
-
+use Garden\Daemon\AppInterface;
+use Garden\Daemon\Daemon;
+use Garden\Daemon\ErrorHandler;
 use Kaecyra\AppCommon\AbstractConfig;
-use Kaecyra\AppCommon\ConfigInterface;
 use Kaecyra\AppCommon\ConfigCollection;
+use Kaecyra\AppCommon\ConfigInterface;
 use Kaecyra\AppCommon\Event\EventAwareInterface;
 use Kaecyra\AppCommon\Event\EventAwareTrait;
-
+use Kaecyra\AppCommon\Log\AggregateLogger;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Vanilla\QueueWorker\Addon\AddonManager;
+use Vanilla\QueueWorker\Allocation\AllocationStrategyInterface;
+use Vanilla\QueueWorker\Error\FatalErrorHandler;
+use Vanilla\QueueWorker\Error\LogErrorHandler;
+use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
+use Vanilla\QueueWorker\Message\Parser\ParserInterface;
 
 /**
  * Payload Context
@@ -42,11 +40,10 @@ use Psr\Log\LogLevel;
  * or a MaintenanceWorker when run() is called.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @version 0.2
+ * @version 2.0.0
  */
-class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInterface {
-
+class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInterface
+{
     use LoggerAwareTrait;
     use LoggerBoilerTrait;
     use EventAwareTrait;
@@ -95,8 +92,14 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
 
     /**
      * Queue worker bootstrap
+     *
+     * @param $dir
+     *
+     * @throws \Garden\Container\ContainerException
+     * @throws \Garden\Container\NotFoundException
      */
-    public static function bootstrap($dir) {
+    public static function bootstrap($dir)
+    {
         global $container, $logger;
 
         // Reflect on ourselves for the version
@@ -133,46 +136,40 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
             ->rule(ContainerInterface::class)
             ->addAlias(Container::class)
             ->setClass(Container::class)
-
             ->setInstance(ContainerInterface::class, $container)
-
             ->defaultRule()
             ->setShared(true)
-
             ->rule(ConfigCollection::class)
             ->addAlias(AbstractConfig::class)
             ->addAlias(ConfigInterface::class)
             ->addCall('addFile', [paths(PATH_ROOT, 'conf/config.json'), false])
             ->addCall('addFolder', [paths(PATH_ROOT, 'conf/conf.d'), 'json'])
-
             ->rule(LoggerAwareInterface::class)
             ->addCall('setLogger')
-
             ->rule(EventAwareInterface::class)
             ->addCall('setEventManager')
-
             ->rule(AddonManager::class)
             //->setConstructorArgs([new Reference([AbstractConfig::class, 'addons.scan'])])
             ->setConstructorArgs([[]])
-
             ->rule(Daemon::class)
             ->setConstructorArgs([
                 [
-                    'appversion'        => APP_VERSION,
-                    'appdir'            => PATH_ROOT,
-                    'appdescription'    => 'Asynchronous Queue Worker',
-                    'appnamespace'      => 'Vanilla\\QueueWorker',
-                    'appname'           => 'QueueWorker',
-                    'authorname'        => 'Tim Gunter',
-                    'authoremail'       => 'tim@vanillaforums.com'
+                    'appversion' => APP_VERSION,
+                    'appdir' => PATH_ROOT,
+                    'appdescription' => 'Asynchronous Queue Worker',
+                    'appnamespace' => 'Vanilla\\QueueWorker',
+                    'appname' => 'QueueWorker',
+                    'authorname' => 'Tim Gunter',
+                    'authoremail' => 'tim@vanillaforums.com',
                 ],
-                new Reference([AbstractConfig::class, 'daemon'])
+                new Reference([AbstractConfig::class, 'daemon']),
             ])
-            ->addCall('configure', [new Reference([AbstractConfig::class, "daemon"])]);
+            ->addCall('configure', [new Reference([AbstractConfig::class, "daemon"])])
+        ;
 
         // Set up loggers
 
-        $logger = new \Kaecyra\AppCommon\Log\AggregateLogger;
+        $logger = new AggregateLogger;
         $logLevel = $container->get(AbstractConfig::class)->get('log.level');
         $loggers = $container->get(AbstractConfig::class)->get('log.loggers');
         foreach ($loggers as $logConfig) {
@@ -240,7 +237,8 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      * Clean up environment
      *
      */
-    public function cleanEnvironment() {
+    public function cleanEnvironment()
+    {
         $this->lastOversight = 0;
         $this->workers = [];
     }
@@ -251,7 +249,8 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      * Provide any custom CLI configuration, and check validity of configuration.
      *
      */
-    public function preflight() {
+    public function preflight()
+    {
         $this->log(LogLevel::INFO, " preflight checking");
 
         $fleetSize = $this->config->get('daemon.fleet');
@@ -267,9 +266,12 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      * connections should be established here, since this method's actions are
      * pre-worker forking, and will be shared to child processes.
      *
-     * @param Args $args
+     * @param \Garden\Cli\Args $args
+     *
+     * @throws \Exception
      */
-    public function initialize(Args $args) {
+    public function initialize(Args $args)
+    {
         $this->log(LogLevel::INFO, " initializing");
 
         // Remove echo logger
@@ -289,7 +291,8 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      * This occurs in the main daemon process when all child workers have been
      * reaped and we're about to shut down.
      */
-    public function dismiss() {
+    public function dismiss()
+    {
         // NOOP
     }
 
@@ -301,7 +304,8 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      *
      * @return bool
      */
-    public function getLaunchOverride() {
+    public function getLaunchOverride()
+    {
         $oversightFrequency = $this->config->get('queue.oversight.frequency');
 
         if ((time() - $this->lastOversight) > $oversightFrequency) {
@@ -318,14 +322,15 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      *
      * @return array|bool
      */
-    public function getWorkerConfig() {
+    public function getWorkerConfig()
+    {
 
         if ($this->getLaunchOverride()) {
             $this->lastOversight = time();
 
             return [
-                'worker'    => 'maintenance',
-                'class'     => '\\Vanilla\\QueueWorker\\Worker\\MaintenanceWorker'
+                'worker' => 'maintenance',
+                'class' => '\\Vanilla\\QueueWorker\\Worker\\MaintenanceWorker',
             ];
         }
 
@@ -335,9 +340,9 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
         }
 
         return [
-            'worker'    => 'product',
-            'class'     => '\\Vanilla\\QueueWorker\\Worker\\ProductWorker',
-            'slot'      => $slot
+            'worker' => 'product',
+            'class' => '\\Vanilla\\QueueWorker\\Worker\\ProductWorker',
+            'slot' => $slot,
         ];
     }
 
@@ -346,7 +351,8 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      *
      * @return int
      */
-    public function getFreeSlot(): int {
+    public function getFreeSlot(): int
+    {
         foreach ($this->workers as $slot => $pid) {
             if (is_null($pid)) {
                 return $slot;
@@ -361,9 +367,11 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      * @param int $pid
      * @param string $realm
      * @param array $workerConfig
+     *
      * @return bool
      */
-    public function spawnedWorker($pid, $realm, $workerConfig): bool {
+    public function spawnedWorker($pid, /** @noinspection PhpUnusedParameterInspection */ $realm, $workerConfig): bool
+    {
         $slot = val('slot', $workerConfig, false);
         if ($slot === false) {
             return false;
@@ -378,22 +386,24 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      *
      * @param int $pid
      * @param string $realm
+     *
      * @return boolean
      */
-    public function reapedWorker($pid, $realm): bool {
+    public function reapedWorker($pid, $realm): bool
+    {
         $this->log(LogLevel::DEBUG, "Recovered worker in realm '{realm}' with pid '{pid}'", [
             'realm' => $realm,
-            'pid' => $pid
+            'pid' => $pid,
         ]);
 
         foreach ($this->workers as $slot => &$workerPid) {
             $this->log(LogLevel::DEBUG, " checking worker: {pid}", [
-                'pid' => $workerPid
+                'pid' => $workerPid,
             ]);
 
             if ($pid === $workerPid) {
                 $this->log(LogLevel::DEBUG, " worker slot {slot} freed", [
-                    'slot' => $slot
+                    'slot' => $slot,
                 ]);
                 $workerPid = null;
                 return true;
@@ -412,7 +422,8 @@ class QueueWorker implements AppInterface, LoggerAwareInterface, EventAwareInter
      *
      * @param array $workerConfig
      */
-    public function run($workerConfig) {
+    public function run($workerConfig)
+    {
 
         // Clean worker environment
         $this->cleanEnvironment();
