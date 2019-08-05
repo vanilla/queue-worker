@@ -2,7 +2,7 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Message;
@@ -11,11 +11,10 @@ namespace Vanilla\QueueWorker\Message;
  * Queue message.
  *
  * @author Tim Gunter <tim@vanillaforums.com>
- * @package queue-worker
- * @version 1.0
+ * @author Eduardo Garcia Julia <eduardo.garciajulia@vanillaforums.com>
  */
-class Message {
-
+class Message
+{
     /**
      * Message ID
      *
@@ -44,7 +43,8 @@ class Message {
      * @param array $headers
      * @param array $body
      */
-    public function __construct(string $id, array $headers, array $body) {
+    public function __construct(string $id, array $headers, array $body)
+    {
         $this->id = $id;
         $this->headers = $headers;
         $this->body = $body;
@@ -55,7 +55,8 @@ class Message {
      *
      * @return string
      */
-    public function getID(): string {
+    public function getID(): string
+    {
         return $this->id;
     }
 
@@ -64,7 +65,8 @@ class Message {
      *
      * @return array
      */
-    public function getHeaders(): array {
+    public function getHeaders(): array
+    {
         return $this->headers;
     }
 
@@ -73,8 +75,20 @@ class Message {
      *
      * @return array
      */
-    public function getBody(): array {
+    public function getBody(): array
+    {
         return $this->body;
+    }
+
+    /**
+     * @param string $key
+     * @param null $default
+     *
+     * @return mixed
+     */
+    public function getBodyKey(string $key, $default = null)
+    {
+        return valr(trim($key), $this->body, $default);
     }
 
     /**
@@ -82,7 +96,8 @@ class Message {
      *
      * @return string
      */
-    public function getQueue(): string {
+    public function getQueue(): string
+    {
         return $this->getHeader('broker_queue', '');
     }
 
@@ -91,7 +106,8 @@ class Message {
      *
      * @return string
      */
-    public function getPayloadType(): string {
+    public function getPayloadType(): string
+    {
         return $this->getHeader('type', 'N/A');
     }
 
@@ -100,9 +116,25 @@ class Message {
      *
      * @param string $key
      * @param null $default
+     *
      * @return mixed|null
      */
-    public function getHeader(string $key, $default = null) {
+    public function getHeader(string $key, $default = null)
+    {
         return $this->headers[$key] ?? $default;
     }
+
+    /**
+     * Get key from header
+     *
+     * @param string $key
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function getHeaderKey(string $key, $default = null)
+    {
+        return valr(trim($key), $this->headers, $default);
+    }
+
 }
