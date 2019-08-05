@@ -2,19 +2,18 @@
 
 /**
  * @license Proprietary
- * @copyright 2009-2016 Vanilla Forums Inc.
+ * @copyright 2009-2019 Vanilla Forums Inc.
  */
 
 namespace Vanilla\QueueWorker\Exception;
 
-use Vanilla\QueueWorker\Job\JobStatus;
+use Exception;
 
 /**
  * Class JobRetryException.
  */
-class JobRetryException extends QueueMessageException {
-    protected const JOB_STATUS = JobStatus::ABANDONED;
-
+class JobRetryException extends Exception
+{
     /* @var int */
     private $delay;
 
@@ -22,17 +21,19 @@ class JobRetryException extends QueueMessageException {
      * JobRetryException constructor.
      *
      * @param int|null $delay
-     * @param string|null $reason
+     * @param string $reason
      */
-    public function __construct(int $delay = null, string $reason = null) {
-        parent::__construct(null, $reason ?? "");
+    public function __construct(int $delay = null, string $reason = "")
+    {
+        parent::__construct($reason);
         $this->delay = $delay;
     }
 
     /**
      * @return int|null
      */
-    public function getDelay(): ?int {
+    public function getDelay(): ?int
+    {
         return $this->delay;
     }
 }
