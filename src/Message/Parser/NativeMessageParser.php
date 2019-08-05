@@ -39,7 +39,7 @@ class NativeMessageParser implements ParserInterface
         $body = json_decode($rawMessage['body'], true);
 
         $headers = [
-            'broker_id' => $rawMessage['queue'],
+            'broker_id' => $rawMessage['id'],
             'broker_queue' => $rawMessage['queue'],
             'broker_nacks' => $rawMessage['nacks'],
             'broker_additional-deliveries' => $rawMessage['additional-deliveries'],
