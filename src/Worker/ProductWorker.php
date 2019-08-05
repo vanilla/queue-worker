@@ -24,6 +24,7 @@ use Vanilla\QueueWorker\Exception\JobRetryException;
 use Vanilla\QueueWorker\Exception\JobRetryExhaustedException;
 use Vanilla\QueueWorker\Exception\JobRetryFailedException;
 use Vanilla\QueueWorker\Exception\MessageMismatchWorkerException;
+use Vanilla\QueueWorker\Exception\RetryJobExhaustedWorkerException;
 use Vanilla\QueueWorker\Exception\WorkerException;
 use Vanilla\QueueWorker\Exception\WorkerRetryException;
 use Vanilla\QueueWorker\Job\JobInterface;
@@ -236,16 +237,14 @@ class ProductWorker extends AbstractQueueWorker
                     try {
                         // Announce requeueJob
                         $this->fireEvent(new RequeueJobProductWorkerEvent($this, $job, $ex));
-                        // Announce executedJob
-                        $this->fireEvent(new ExecutedJobProductWorkerEvent($this, $job));
-                        // Ack the message
-                        $this->getDisqueClient()->ackJob($message->getBrokerId());
-                        $this->fireEvent(new AckedMessageProductWorkerEvent($this, $message));
-
                         $isTrueFail = false;
                     } catch (Throwable $requeueException) {
-                        // The Api could respond that the Job is expired/exhausted and the retry was denied
-                        // This could happens because you reached the TTL of the Job or a TTL hard-limit
+                        if ($requeueException instanceof RetryJobExhaustedWorkerException) {
+                            // The Api could respond that the Job is expired/exhausted and the retry was denied
+                            // This could happens because you reached the TTL of the Job or a TTL hard-limit
+                            $isTrueFail = false;
+                        }
+
                         $ex = $requeueException;
                     }
                 }
@@ -259,7 +258,15 @@ class ProductWorker extends AbstractQueueWorker
                     $this->getDisqueClient()->nack($message->getBrokerId());
                     $this->fireEvent(new NackedMessageProductWorkerEvent($this, $message));
 
+                    // Announce failedIteration
                     $this->fireEvent(new FailedIterationProductWorkerEvent($this, $ex));
+                } else {
+                    // Ack the message
+                    $this->getDisqueClient()->ackJob($message->getBrokerId());
+                    $this->fireEvent(new AckedMessageProductWorkerEvent($this, $message));
+
+                    // Announce executedJob
+                    $this->fireEvent(new ExecutedJobProductWorkerEvent($this, $job));
                 }
             }
 
