@@ -7,9 +7,7 @@
 
 namespace Vanilla\QueueWorker\Worker;
 
-use Disque\Connection\ConnectionException;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LogLevel;
 use Throwable;
 use Vanilla\QueueWorker\Event\AckedMessageProductWorkerEvent;
 use Vanilla\QueueWorker\Event\ExecutedJobProductWorkerEvent;
@@ -17,7 +15,10 @@ use Vanilla\QueueWorker\Event\FailedIterationProductWorkerEvent;
 use Vanilla\QueueWorker\Event\GotJobProductWorkerEvent;
 use Vanilla\QueueWorker\Event\GotMessageProductWorkerEvent;
 use Vanilla\QueueWorker\Event\NackedMessageProductWorkerEvent;
+use Vanilla\QueueWorker\Event\ProductWorkerExhaustedWorkerEvent;
+use Vanilla\QueueWorker\Event\ProductWorkerReadyWorkerEvent;
 use Vanilla\QueueWorker\Event\RequeueJobProductWorkerEvent;
+use Vanilla\QueueWorker\Event\UpdatedQueueProductWorkerEvent;
 use Vanilla\QueueWorker\Event\ValidateMessageProductWorkerEvent;
 use Vanilla\QueueWorker\Exception\InvalidMessageWorkerException;
 use Vanilla\QueueWorker\Exception\JobRetryException;
@@ -37,12 +38,6 @@ use Vanilla\QueueWorker\Message\Message;
  */
 class ProductWorker extends AbstractQueueWorker
 {
-
-    /**
-     * Max retries to connect to the Daemon
-     */
-    const MAX_RETRIES = 15;
-
     /**
      * @var int Worker slot
      */
@@ -79,92 +74,33 @@ class ProductWorker extends AbstractQueueWorker
     protected $iterationFinishTime;
 
     /**
-     * Check if queue is a ready to retrieve jobs
-     *
-     * @return bool
-     */
-    public function isReady()
-    {
-        return $this->iterations > 0;
-    }
-
-    /**
-     * Update queue priority
-     *
-     * Each worker is assigned a "slot" by the main queue process. This slot is
-     * associated with a set of queues. Every queue.oversight.adjust seconds the
-     * worker re-queries its list of queues from memcache. This allows the queue
-     * to automatically adjust itself to changing queue backlogs.
-     *
-     * This method queries the distribution array and updates the queue list based
-     * on slot number.
-     *
-     * @throws \Exception
-     */
-    public function updateDistribution()
-    {
-        if (!$this->slotQueues || (time() - $this->lastSync) > $this->syncFrequency) {
-            // Sync
-            $distribution = $this->getCache()->get(AbstractQueueWorker::QUEUE_DISTRIBUTION_KEY);
-            if (!$distribution) {
-                $distribution = [];
-            }
-
-            $update = val($this->slot, $distribution, $this->getQueues('pull'));
-            if ($this->slotQueues != $update) {
-                $this->slotQueues = $update;
-                $this->fire('updatedQueues', [$this]);
-            }
-            $this->lastSync = time();
-        }
-    }
-
-    /**
-     * Prepare product worker
-     *
-     * @param $workerConfig
-     *
-     * @throws ConnectionException
-     * @throws \Exception
-     */
-    public function prepareProductWorker($workerConfig)
-    {
-
-        // Prepare sync tracking
-        $this->lastSync = 0;
-        $this->syncFrequency = $this->config->get('queue.oversight.adjust', 5);
-
-        // Prepare execution environment tracking
-        $this->iterations = $this->config->get('process.max_requests', 0);
-
-        // Prepare slot tracking
-        $this->slot = $workerConfig['slot'];
-
-        // Connect to queues and cache
-        $this->prepareWorker(self::MAX_RETRIES);
-
-        // Announce workerReady
-        $this->fire('workerReady', [$this]);
-    }
-
-    /**
      * Run worker instance
      *
      * This method runs the product queue processor worker.
      *
      * @param mixed $workerConfig
      *
-     * @throws ConnectionException
      * @throws \Throwable
      */
     public function run($workerConfig)
     {
+        // Prepare sync tracking
+        $this->lastSync = 0;
+        $this->syncFrequency = $this->getConfig()->get('queue.oversight.adjust', 5);
 
-        // Prepare worker
-        $this->prepareProductWorker($workerConfig);
+        // Prepare execution environment tracking
+        $this->iterations = $this->getConfig()->get('process.max_requests', 0);
+
+        // Prepare slot tracking
+        $this->slot = $workerConfig['slot'];
+
+        // prepare idle sleep
+        $idleSleep = $this->getConfig()->get('process.sleep') * 1000;
+
+        // Announce workerReady
+        $this->fireEvent(new ProductWorkerReadyWorkerEvent($this));
 
         // Get jobs and do them.
-        $idleSleep = $this->config->get('process.sleep') * 1000;
         while ($this->isReady()) {
 
             // Potentially update worker distribution according to oversight
@@ -178,7 +114,7 @@ class ProductWorker extends AbstractQueueWorker
             }
         }
 
-        $this->log(LogLevel::NOTICE, " exhausted iterations, exiting");
+        $this->fireEvent(new ProductWorkerExhaustedWorkerEvent($this));
     }
 
     /**
@@ -227,7 +163,7 @@ class ProductWorker extends AbstractQueueWorker
                 $this->fireEvent(new ExecutedJobProductWorkerEvent($this, $job));
 
                 // Ack the message
-                $this->getDisqueClient()->ackJob($message->getBrokerId());
+                $this->getBrokerClient()->ackJob($message->getBrokerId());
                 $this->fireEvent(new AckedMessageProductWorkerEvent($this, $message));
 
             } catch (Throwable $ex) {
@@ -255,14 +191,14 @@ class ProductWorker extends AbstractQueueWorker
                     }
 
                     // Nack the message
-                    $this->getDisqueClient()->nack($message->getBrokerId());
+                    $this->getBrokerClient()->nack($message->getBrokerId());
                     $this->fireEvent(new NackedMessageProductWorkerEvent($this, $message));
 
                     // Announce failedIteration
                     $this->fireEvent(new FailedIterationProductWorkerEvent($this, $ex));
                 } else {
                     // Ack the message
-                    $this->getDisqueClient()->ackJob($message->getBrokerId());
+                    $this->getBrokerClient()->ackJob($message->getBrokerId());
                     $this->fireEvent(new AckedMessageProductWorkerEvent($this, $message));
 
                     // Announce executedJob
@@ -278,11 +214,44 @@ class ProductWorker extends AbstractQueueWorker
     }
 
     /**
+     * Update queue priority
+     *
+     * Each worker is assigned a "slot" by the main queue process. This slot is
+     * associated with a set of queues. Every queue.oversight.adjust seconds the
+     * worker re-queries its list of queues from memcache. This allows the queue
+     * to automatically adjust itself to changing queue backlogs.
+     *
+     * This method queries the distribution array and updates the queue list based
+     * on slot number.
+     *
+     * @throws \Throwable
+     */
+    public function updateDistribution()
+    {
+        if (!$this->slotQueues || (time() - $this->lastSync) > $this->syncFrequency) {
+            // Sync
+            $distribution = $this->getCache()->get(AbstractQueueWorker::QUEUE_DISTRIBUTION_KEY);
+            if (!$distribution) {
+                $distribution = [];
+            }
+
+            $update = val($this->slot, $distribution, $this->getQueues('pull'));
+            if ($this->slotQueues != $update) {
+                $this->slotQueues = $update;
+                $this->fireEvent(new UpdatedQueueProductWorkerEvent($this));
+            }
+            $this->lastSync = time();
+        }
+    }
+
+    /**
      * Get job for message
      *
-     * @param Message $message
+     * @param \Vanilla\QueueWorker\Message\Message $message
      *
-     * @return JobInterface
+     * @return \Vanilla\QueueWorker\Job\JobInterface
+     * @throws \Garden\Container\ContainerException
+     * @throws \Garden\Container\NotFoundException
      * @throws \Vanilla\QueueWorker\Exception\InvalidMessageWorkerException
      * @throws \Vanilla\QueueWorker\Exception\MessageMismatchWorkerException
      */
@@ -291,7 +260,7 @@ class ProductWorker extends AbstractQueueWorker
         /**
          * @var ContainerInterface
          */
-        $workerDI = $this->container->get('@WorkerContainer');
+        $workerDI = $this->getContainer()->get('@WorkerContainer');
 
         $payloadType = $message->getType();
 
@@ -317,7 +286,7 @@ class ProductWorker extends AbstractQueueWorker
     /**
      * Get messages from slot queues
      *
-     * @return array
+     * @return mixed
      */
     protected function getMessagesFromSlotQueues()
     {
@@ -333,11 +302,21 @@ class ProductWorker extends AbstractQueueWorker
             'nohang' => true,
             'count' => 1,
             'withcounters' => true,
-            'timeout' => 0,
         ];
 
         // Get job from slot queues
-        return call_user_func_array([$this->getDisqueClient(), 'getJob'], $commandArgs);
+        $this->getBrokerClient()->connect();
+        return call_user_func_array([$this->getBrokerClient(), 'getJob'], $commandArgs);
+    }
+
+    /**
+     * Check if queue is a ready to retrieve jobs
+     *
+     * @return bool
+     */
+    public function isReady()
+    {
+        return $this->iterations > 0;
     }
 
     /**
@@ -362,20 +341,23 @@ class ProductWorker extends AbstractQueueWorker
     protected function createWorkerContainer()
     {
         // Clone DI to prevent pollution
-        $workerContainer = clone $this->container;
+        $workerContainer = clone $this->getContainer();
         $workerContainer->setInstance(ContainerInterface::class, $workerContainer);
 
         // Remember this DI in the main DI
-        $this->container->setInstance('@WorkerContainer', $workerContainer);
+        $this->getContainer()->setInstance('@WorkerContainer', $workerContainer);
     }
 
     /**
      * Destroy the @WorkerContainer
+     *
+     * @throws \Garden\Container\ContainerException
+     * @throws \Garden\Container\NotFoundException
      */
     protected function destroyWorkerContainer()
     {
-        $this->container->get('@WorkerContainer')->setInstance(Container::class, null);
-        $this->container->setInstance('@WorkerContainer', null);
+        $this->getContainer()->get('@WorkerContainer')->setInstance(Container::class, null);
+        $this->getContainer()->setInstance('@WorkerContainer', null);
     }
 
     /**
@@ -405,5 +387,15 @@ class ProductWorker extends AbstractQueueWorker
         return $this->iterationFinishTime === null ?
             microtime(true) - $this->iterationStartTime :
             $this->iterationFinishTime - $this->iterationStartTime;
+    }
+
+    /**
+     * Get worker slot
+     *
+     * @return int slot number
+     */
+    public function getSlot(): int
+    {
+        return $this->slot;
     }
 }

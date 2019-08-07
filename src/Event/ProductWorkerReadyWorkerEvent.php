@@ -9,11 +9,11 @@ namespace Vanilla\QueueWorker\Event;
 use Vanilla\QueueWorker\Worker\ProductWorker;
 
 /**
- * Class WorkerReadyWorkerEvent
+ * Class ProductWorkerReadyWorkerEvent
  *
  * @author Eduardo Garcia Julia <eduardo.garciajulia@vanillaforums.com>
  */
-class WorkerReadyWorkerEvent extends WorkerEvent
+class ProductWorkerReadyWorkerEvent extends WorkerEvent
 {
     /**
      * @var \Vanilla\QueueWorker\Worker\ProductWorker
@@ -21,7 +21,7 @@ class WorkerReadyWorkerEvent extends WorkerEvent
     protected $worker;
 
     /**
-     * WorkerReadyWorkerEvent constructor.
+     * ProductWorkerReadyWorkerEvent constructor.
      *
      * @param \Vanilla\QueueWorker\Worker\ProductWorker $worker
      */

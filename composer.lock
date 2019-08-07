@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "de24efef0d755f181a14ba325ad9c335",
+    "content-hash": "af7389bcdbe6f3b3d73f1a6c61b79cba",
     "packages": [
         {
             "name": "kaecyra/app-common",
@@ -463,7 +463,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.0"
+        "php": ">=7.2"
     },
     "platform-dev": []
 }

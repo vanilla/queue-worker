@@ -188,11 +188,6 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface
      */
     public function startAddons($addons)
     {
-        // Scan source folders
-        $this->scanSourceFolders();
-
-        $this->log(LogLevel::NOTICE, "Starting addons");
-
         // Include and instantiate active addons
         $this->enabled = [];
 
@@ -221,10 +216,6 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface
 
         $nest = str_repeat(' ', $level);
 
-        $this->log(LogLevel::NOTICE, "{$nest} start addon: {addon}", [
-            'addon' => $addonName,
-        ]);
-
         // Short circuit if already started
         if ($this->isStarted($addonName)) {
             $this->log(LogLevel::INFO, "{$nest}  already started");
@@ -244,9 +235,6 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface
         // If we have requirements, try to load them
         if (count($requiredAddons)) {
             $txtRequirements = implode(',', $requiredAddons);
-            $this->log(LogLevel::INFO, "{$nest}  addon has requirements: {requirements}", [
-                'requirements' => $txtRequirements,
-            ]);
 
             // Check if the requirements are all available
             $missing = [];
@@ -257,6 +245,9 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface
             }
             if (count($missing)) {
                 $txtMissing = implode(',', $missing);
+                $this->log(LogLevel::INFO, "{$nest}  addon has requirements: {requirements}", [
+                    'requirements' => $txtRequirements,
+                ]);
                 $this->log(LogLevel::WARNING, "{$nest}  missing requirements: {missing}", [
                     'missing' => $txtMissing,
                 ]);
@@ -296,9 +287,6 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface
 
         $addonClass = $addon->getAddonClass();
         if ($addonClass) {
-
-            $this->log(LogLevel::INFO, "{$nest}  creating addon instance: {$addonClass}");
-
             // Get instance
             $instance = $this->container->getArgs($addonClass, [
                 new Reference([AbstractConfig::class, "addons.addon.{$addonName}"]),
@@ -306,7 +294,6 @@ class AddonManager implements LoggerAwareInterface, EventAwareInterface
             $instance->setAddon($addon);
             $this->instances[$addonName] = $instance;
             $instance->start();
-
         }
 
         $this->enabled[$addonName] = true;

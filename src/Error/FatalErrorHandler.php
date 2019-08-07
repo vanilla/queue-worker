@@ -9,7 +9,8 @@ namespace Vanilla\QueueWorker\Error;
 
 use Garden\Daemon\ErrorHandlerInterface;
 use Kaecyra\AppCommon\Event\EventAwareInterface;
-use Kaecyra\AppCommon\Event\EventAwareTrait;
+use Vanilla\QueueWorker\Event\EventAwareTrait;
+use Vanilla\QueueWorker\Event\FatalErrorWorkerEvent;
 use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
 
 /**
@@ -17,34 +18,27 @@ use Vanilla\QueueWorker\Log\LoggerBoilerTrait;
  *
  * @author Tim Gunter <tim@vanillaforums.com>
  */
-class FatalErrorHandler implements ErrorHandlerInterface, EventAwareInterface {
+class FatalErrorHandler implements ErrorHandlerInterface, EventAwareInterface
+{
 
     use LoggerBoilerTrait;
     use EventAwareTrait;
 
     /**
-     * Log error
-     *
      * @param int $errorLevel
      * @param string $message
      * @param string $file
      * @param int $line
      * @param array $context
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function error($errorLevel, $message, $file, $line, $context) {
+    public function error($errorLevel, $message, $file, $line, $context)
+    {
         $level = $this->phpErrorLevel($errorLevel);
-
         $backtrace = debug_backtrace(0);
 
-        $this->fire('fatalError', [[
-            'level'     => $level ?? 'fatal',
-            'message'   => "Uncaught exception '{$message}'",
-            'file'      => $file,
-            'line'      => $line,
-            'backtrace' => $backtrace
-        ]]);
+        $this->fireEvent(new FatalErrorWorkerEvent($level, $message, $file, $line, $backtrace));
     }
 
 }
