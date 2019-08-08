@@ -26,6 +26,7 @@ use Vanilla\QueueWorker\Exception\JobRetryExhaustedException;
 use Vanilla\QueueWorker\Exception\JobRetryFailedException;
 use Vanilla\QueueWorker\Exception\MessageMismatchWorkerException;
 use Vanilla\QueueWorker\Exception\RetryJobExhaustedWorkerException;
+use Vanilla\QueueWorker\Exception\RetryJobFailedWorkerException;
 use Vanilla\QueueWorker\Exception\WorkerException;
 use Vanilla\QueueWorker\Exception\WorkerRetryException;
 use Vanilla\QueueWorker\Job\JobInterface;
@@ -66,7 +67,7 @@ class ProductWorker extends AbstractQueueWorker
     /**
      * @var integer
      */
-    protected $iterationStartTime;
+    protected $iterationStartTime = 0;
 
     /**
      * @var integer
@@ -86,16 +87,16 @@ class ProductWorker extends AbstractQueueWorker
     {
         // Prepare sync tracking
         $this->lastSync = 0;
-        $this->syncFrequency = $this->getConfig()->get('queue.oversight.adjust', 5);
+        $this->syncFrequency = $this->getConfig()->get('queue.oversight.adjust', 600);
 
         // Prepare execution environment tracking
-        $this->iterations = $this->getConfig()->get('process.max_requests', 0);
+        $this->iterations = $this->getConfig()->get('process.max_requests', 10000);
 
         // Prepare slot tracking
         $this->slot = $workerConfig['slot'];
 
         // prepare idle sleep
-        $idleSleep = $this->getConfig()->get('process.sleep') * 1000;
+        $idleSleep = $this->getConfig()->get('process.sleep', 500) * 1000;
 
         // Announce workerReady
         $this->fireEvent(new ProductWorkerReadyWorkerEvent($this));
@@ -134,9 +135,10 @@ class ProductWorker extends AbstractQueueWorker
             return false;
         }
 
+        // getMessagesFromSlotQueues is giving us at-most-one-message. However, we keep the loop for convenience
         foreach ($messages as $rawMessage) {
-            // Got a message, so decrement iterations
-            $this->iterations--;
+            // Got a message, so mark we are running an iteration
+            $this->markIterationStart();
 
             // Prevent pollution
             $this->createWorkerContainer();
@@ -167,7 +169,10 @@ class ProductWorker extends AbstractQueueWorker
                 $this->fireEvent(new AckedMessageProductWorkerEvent($this, $message));
 
             } catch (Throwable $ex) {
+                // $isTrueFail determined witch kind of Event we fire
                 $isTrueFail = true;
+                // $ackJob determined if we ack or nack the message in the Broker
+                $ackJob = true;
 
                 if ($ex instanceof JobRetryException) {
                     try {
@@ -176,38 +181,50 @@ class ProductWorker extends AbstractQueueWorker
                         $isTrueFail = false;
                     } catch (Throwable $requeueException) {
                         if ($requeueException instanceof RetryJobExhaustedWorkerException) {
-                            // The Api could respond that the Job is expired/exhausted and the retry was denied
-                            // This could happens because you reached the TTL of the Job or a TTL hard-limit
+                            /*
+                             * The Api could respond that the Job is expired/exhausted and the retry was denied
+                             * This could happens because you reached the TTL of the Job or a TTL hard-limit
+                             */
                             $isTrueFail = false;
+                        } elseif ($requeueException instanceof RetryJobFailedWorkerException) {
+                            /*
+                             * RetryJobFail means the Job asked for a Retry, however the Retry couldn't be scheduled (API)
+                             * We nack the Job to requeue into the Broker
+                             */
+                            $ackJob = false;
                         }
-
                         $ex = $requeueException;
                     }
                 }
 
                 if ($isTrueFail) {
                     if (!$ex instanceof WorkerException) {
+                        // convert any kind of Exception into a WorkerException
                         $ex = new WorkerException($message, $job, $ex->getMessage(), ['originatingException' => $ex]);
                     }
-
-                    // Nack the message
-                    $this->getBrokerClient()->nack($message->getBrokerId());
-                    $this->fireEvent(new NackedMessageProductWorkerEvent($this, $message));
-
                     // Announce failedIteration
                     $this->fireEvent(new FailedIterationProductWorkerEvent($this, $ex));
                 } else {
-                    // Ack the message
-                    $this->getBrokerClient()->ackJob($message->getBrokerId());
-                    $this->fireEvent(new AckedMessageProductWorkerEvent($this, $message));
-
                     // Announce executedJob
                     $this->fireEvent(new ExecutedJobProductWorkerEvent($this, $job));
+                }
+
+                if ($ackJob) {
+                    // Ack the message and announce it
+                    $this->getBrokerClient()->ackJob($message->getBrokerId());
+                    $this->fireEvent(new AckedMessageProductWorkerEvent($this, $message));
+                } else {
+                    // Nack the message and announce it
+                    $this->getBrokerClient()->nack($message->getBrokerId());
+                    $this->fireEvent(new NackedMessageProductWorkerEvent($this, $message));
                 }
             }
 
             // Prevent pollution
             $this->destroyWorkerContainer();
+
+            // We are finished, so mark it
+            $this->markIterationFinish();
         }
 
         return true;
@@ -304,7 +321,11 @@ class ProductWorker extends AbstractQueueWorker
             'withcounters' => true,
         ];
 
-        // Get job from slot queues
+        /*
+         * Get job from slot queues
+         * connect method is not a true connect
+         * it will evaluate the need of changing the broker node in case we are already connected
+         */
         $this->getBrokerClient()->connect();
         return call_user_func_array([$this->getBrokerClient(), 'getJob'], $commandArgs);
     }
@@ -365,6 +386,7 @@ class ProductWorker extends AbstractQueueWorker
      */
     public function markIterationStart()
     {
+        $this->iterations--;
         $this->iterationStartTime = microtime(true);
         $this->iterationFinishTime = null;
     }
