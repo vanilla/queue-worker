@@ -102,7 +102,6 @@ try {
             $logger->addLogger($subLogger, $logConfig['level'] ?? $logLevel, $logConfig['key'] ?? null);
         }
     }
-    $logger->disableLogger('persist');
 
     // Set up EventManager
     $eventManager = new EventManager();
@@ -122,26 +121,34 @@ try {
     }
     $addonManager->scanSourceFolders();
 
-    // Init the Daemon
     $cli = new Cli();
     $container->setInstance(Cli::class, $cli);
 
-    $daemon = new Daemon(
-        $cli,
-        $container,
-        [
-            'appversion' => APP_VERSION,
-            'appdir' => PATH_ROOT,
-            'appdescription' => 'Asynchronous Queue Worker',
-            'appnamespace' => 'Vanilla\\QueueWorker',
-            'appname' => 'QueueApp',
-            'authorname' => 'Tim Gunter',
-            'authoremail' => 'tim@vanillaforums.com',
-        ],
-        $config->get('daemon')
-    );
-    $daemon->setLogger($logger);
-    $exitCode = $daemon->attach($argv);
+    if ($config->get('daemon.enable', true) === true) {
+        // Init the Daemon
+        $daemon = new Daemon(
+            $cli,
+            $container,
+            [
+                'appversion' => APP_VERSION,
+                'appdir' => PATH_ROOT,
+                'appdescription' => 'Asynchronous Queue Worker',
+                'appnamespace' => 'Vanilla\\QueueWorker',
+                'appname' => 'QueueApp',
+                'authorname' => 'Tim Gunter',
+                'authoremail' => 'tim@vanillaforums.com',
+            ],
+            $config->get('daemon')
+        );
+        $logger->disableLogger('persist');
+        $daemon->setLogger($logger);
+        $exitCode = $daemon->attach($argv);
+    } else {
+        /* @var Vanilla\QueueWorker\QueueApp $app */
+        $app = $container->get('Vanilla\\QueueWorker\\QueueApp');
+        $workerConfig = $app->getWorkerConfig();
+        $app->run($workerConfig);
+    }
 
 } catch (Throwable $ex) {
     $exitCode = 1;
